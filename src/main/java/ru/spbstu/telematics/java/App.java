@@ -14,7 +14,7 @@ public class App
             try {
                 Matrix matrix1 = new Matrix(args[0]);
                 Matrix matrix2 = new Matrix(args[1]);
-                matrix1.multiplication(matrix2);
+                Matrix matrix3 = matrix1.multiplication(matrix2);
             }
             catch (Exception ex) {
 

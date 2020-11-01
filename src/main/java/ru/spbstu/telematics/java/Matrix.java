@@ -51,7 +51,15 @@ public class Matrix {
             throw new RuntimeException();
         }
         Matrix res = new Matrix(this.matrix.length, other.matrix[0].length);
-        //to do: multiply
+        for(int i = 0; i < res.matrix.length; i++) {
+            for (int j = 0; j < res.matrix[0].length; j++) {
+                int Sum = 0;
+                for (int k = 0; k < res.matrix[0].length; k++) {
+                    Sum += this.matrix[i][k] * other.matrix[k][j];
+                }
+                res.matrix[i][j] = Sum;
+            }
+        }
         return res;
     }
 
