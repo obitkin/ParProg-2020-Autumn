@@ -8,38 +8,51 @@ import java.util.Scanner;
 public class Matrix {
     private double [][] matrix;
 
-    Matrix (int stringsSize, int columnsSize) {
+    private Matrix (int stringsSize, int columnsSize) {
         matrix = new double[stringsSize][columnsSize];
     }
 
-    public Matrix (String filePath) {
+    public Matrix (String filePath) throws NumberFormatException,
+            FileNotFoundException, IllegalStructureMatrixException{
         this.matrix = parseMatrix(filePath);
     }
 
-    private double[][] parseMatrix(String filePath) {
+    private double[][] parseMatrix(String filePath) throws NumberFormatException,
+            FileNotFoundException, IllegalStructureMatrixException {
+
         int stringsSize = 0;
         int columnsSize = 0;
         double[][] matrixTmp = null;
 
-        try (Scanner Scan = new Scanner(new FileReader(filePath))) {
-            while (Scan.hasNextLine() && Scan.hasNextDouble()){
+        Scanner Scan = new Scanner(new FileReader(filePath));
+        while (Scan.hasNextLine() && Scan.hasNextDouble()){
 
-                double[][] tmp = new double[++stringsSize][];
-                tmp = Arrays.copyOf(matrixTmp,matrixTmp.length);
-                matrixTmp = tmp;
+            double[][] tmp = new double[++stringsSize][];
+            tmp = Arrays.copyOf(matrixTmp,matrixTmp.length);
+            matrixTmp = tmp;
+
+            try {
                 matrixTmp[stringsSize - 1] = stringToArrayOfDouble(Scan.nextLine());
-                if (columnsSize == 0) {
-                    columnsSize = matrix[stringsSize - 1].length;
-                }
-                else {
-                    if (columnsSize != matrix[stringsSize - 1].length) {
-                        throw new RuntimeException();
-                    }
+            } catch (NumberFormatException ex) {
+                throw new NumberFormatException("Can't read string № " + (stringsSize - 1));
+            }
+
+            if (columnsSize == 0) {
+                columnsSize = matrixTmp[stringsSize - 1].length;
+            }
+            else {
+                if (columnsSize != matrixTmp[stringsSize - 1].length) {
+                    throw new IllegalStructureMatrixException(
+                            "columnsSize of string № " +
+                            (stringsSize - 1) +
+                            " == " +
+                            matrixTmp[stringsSize - 1].length +
+                            " columnsSize of previous string == " +
+                            columnsSize);
                 }
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
+        Scan.close();
         return matrixTmp;
     }
 
@@ -54,7 +67,6 @@ public class Matrix {
             else {
                 realSizeOfOneString--;
             }
-
         }
         res = Arrays.copyOf(res,realSizeOfOneString);
         return res;
@@ -79,5 +91,10 @@ public class Matrix {
 
     public double Get(int i, int j) {
         return this.matrix[i][j];
+    }
+
+    private class IllegalStructureMatrixException extends Exception {
+        public IllegalStructureMatrixException(String s) {
+        }
     }
 }
