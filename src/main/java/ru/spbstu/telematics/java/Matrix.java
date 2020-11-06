@@ -13,16 +13,21 @@ public class Matrix {
     }
 
     public Matrix (String filePath) {
+        this.matrix = parseMatrix(filePath);
+    }
+
+    private double[][] parseMatrix(String filePath) {
         int stringsSize = 0;
         int columnsSize = 0;
+        double[][] matrixTmp = null;
 
-        try (Scanner Walk = new Scanner(new FileReader(filePath))) {
-            while (Walk.hasNextLine() && Walk.hasNextDouble()){
+        try (Scanner Scan = new Scanner(new FileReader(filePath))) {
+            while (Scan.hasNextLine() && Scan.hasNextDouble()){
 
                 double[][] tmp = new double[++stringsSize][];
-                tmp = Arrays.copyOf(matrix,matrix.length);
-                matrix = tmp;
-                matrix[stringsSize - 1] = stringToArray(Walk.nextLine());
+                tmp = Arrays.copyOf(matrixTmp,matrixTmp.length);
+                matrixTmp = tmp;
+                matrixTmp[stringsSize - 1] = stringToArrayOfDouble(Scan.nextLine());
                 if (columnsSize == 0) {
                     columnsSize = matrix[stringsSize - 1].length;
                 }
@@ -35,14 +40,23 @@ public class Matrix {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        return matrixTmp;
     }
 
-    private double[] stringToArray(String str) {
-        String[] mas = str.split(" ");
-        double[] res = new double[mas.length];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = Double.parseDouble(mas[i]);
+    private double[] stringToArrayOfDouble(String str) throws NumberFormatException{
+        String regex = " ";
+        int realSizeOfOneString = 0;
+        String[] elementsOfOneString = str.split(regex);
+        double[] res = new double[elementsOfOneString.length];
+        for (int i = 0; i < res.length; i++, realSizeOfOneString++) {
+            if (!elementsOfOneString[i].equals(regex))
+                res[realSizeOfOneString] = Double.parseDouble(elementsOfOneString[i]);
+            else {
+                realSizeOfOneString--;
+            }
+
         }
+        res = Arrays.copyOf(res,realSizeOfOneString);
         return res;
     }
 
@@ -63,4 +77,7 @@ public class Matrix {
         return res;
     }
 
+    public double Get(int i, int j) {
+        return this.matrix[i][j];
+    }
 }

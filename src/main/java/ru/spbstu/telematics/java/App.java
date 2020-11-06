@@ -1,27 +1,37 @@
 package ru.spbstu.telematics.java;
 
-import java.io.FileReader;
+/*
+Program for multiplication NumberOfMatrix=2 matrix.
+*/
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
-    public static void main( String[] args ) {
-        if(args.length == 2) {
+    static int NumberOfMatrix = 2; //must be >= 1
 
+    public static void main( String[] args ) {
+        if(args.length == NumberOfMatrix) {
+
+            Matrix result;
+            Matrix[] masMatrix = new Matrix[NumberOfMatrix];
             try {
-                Matrix matrix1 = new Matrix(args[0]);
-                Matrix matrix2 = new Matrix(args[1]);
-                Matrix matrix3 = matrix1.multiplication(matrix2);
+
+                for (int countOfMatrix = 0; countOfMatrix < NumberOfMatrix; countOfMatrix++){
+                    masMatrix[countOfMatrix] = new Matrix(args[countOfMatrix]);
+                }
+
+                result = masMatrix[0];
+
+                for (int countOfMatrix = 1; countOfMatrix < NumberOfMatrix; countOfMatrix++){
+                    result = result.multiplication(masMatrix[countOfMatrix]);
+                }
+
             }
             catch (Exception ex) {
 
             }
 
         } else {
-            System.out.println("Require 2 arguments. There are " + args.length);
+            System.out.println("Require " +  NumberOfMatrix +" arguments. There are " + args.length);
         }
 
     }
