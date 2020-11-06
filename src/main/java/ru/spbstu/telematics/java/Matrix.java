@@ -20,33 +20,33 @@ public class Matrix {
     private double[][] parseMatrix(String filePath) throws NumberFormatException,
             FileNotFoundException, IllegalStructureMatrixException {
 
-        int stringsSize = 0;
+        int rowsSize = 0;
         int columnsSize = 0;
         double[][] matrixTmp = null;
 
         Scanner Scan = new Scanner(new FileReader(filePath));
         while (Scan.hasNextLine() && Scan.hasNextDouble()){
 
-            double[][] tmp = new double[++stringsSize][];
+            double[][] tmp = new double[++rowsSize][];
             tmp = Arrays.copyOf(matrixTmp,matrixTmp.length);
             matrixTmp = tmp;
 
             try {
-                matrixTmp[stringsSize - 1] = stringToArrayOfDouble(Scan.nextLine());
+                matrixTmp[rowsSize - 1] = stringToArrayOfDouble(Scan.nextLine());
             } catch (NumberFormatException ex) {
-                throw new NumberFormatException("Can't read string № " + (stringsSize - 1));
+                throw new NumberFormatException("Can't read string № " + (rowsSize - 1));
             }
 
             if (columnsSize == 0) {
-                columnsSize = matrixTmp[stringsSize - 1].length;
+                columnsSize = matrixTmp[rowsSize - 1].length;
             }
             else {
-                if (columnsSize != matrixTmp[stringsSize - 1].length) {
+                if (columnsSize != matrixTmp[rowsSize - 1].length) {
                     throw new IllegalStructureMatrixException(
                             "columnsSize of string № " +
-                            (stringsSize - 1) +
+                            (rowsSize - 1) +
                             " == " +
-                            matrixTmp[stringsSize - 1].length +
+                            matrixTmp[rowsSize - 1].length +
                             " columnsSize of previous string == " +
                             columnsSize);
                 }
@@ -58,43 +58,60 @@ public class Matrix {
 
     private double[] stringToArrayOfDouble(String str) throws NumberFormatException{
         String regex = " ";
-        int realSizeOfOneString = 0;
+        int realSizeOfOneRow = 0;
         String[] elementsOfOneString = str.split(regex);
         double[] res = new double[elementsOfOneString.length];
-        for (int i = 0; i < res.length; i++, realSizeOfOneString++) {
+        for (int i = 0; i < res.length; i++, realSizeOfOneRow++) {
             if (!elementsOfOneString[i].equals(regex))
-                res[realSizeOfOneString] = Double.parseDouble(elementsOfOneString[i]);
+                res[realSizeOfOneRow] = Double.parseDouble(elementsOfOneString[i]);
             else {
-                realSizeOfOneString--;
+                realSizeOfOneRow--;
             }
         }
-        res = Arrays.copyOf(res,realSizeOfOneString);
+        res = Arrays.copyOf(res,realSizeOfOneRow);
         return res;
     }
 
-    public Matrix multiplication(Matrix other) {
-        if (this.matrix[0].length != other.matrix.length) {
-            throw new RuntimeException();
+    public Matrix multiplication(Matrix other) throws MatrixNotJoint {
+        if (this.getColumnSize() != other.getRowSize()) {
+            throw new MatrixNotJoint("");
         }
-        Matrix res = new Matrix(this.matrix.length, other.matrix[0].length);
-        for(int i = 0; i < res.matrix.length; i++) {
-            for (int j = 0; j < res.matrix[0].length; j++) {
+        Matrix res = new Matrix(this.getRowSize(), other.getColumnSize());
+        for(int i = 0; i < res.getRowSize(); i++) {
+            for (int j = 0; j < res.getColumnSize(); j++) {
                 int Sum = 0;
-                for (int k = 0; k < res.matrix[0].length; k++) {
-                    Sum += this.matrix[i][k] * other.matrix[k][j];
+                for (int k = 0; k < res.getColumnSize(); k++) {
+                    Sum += this.get(i,k) * other.get(k,j);
                 }
-                res.matrix[i][j] = Sum;
+                res.set(i,j,Sum);
             }
         }
         return res;
     }
 
-    public double Get(int i, int j) {
+    public double get(int i, int j) {
         return this.matrix[i][j];
+    }
+
+    public int getRowSize() {
+        return this.matrix.length;
+    }
+
+    public int getColumnSize() {
+        return this.matrix[0].length;
+    }
+
+    public void set(int indexI, int indexJ, double value) {
+        this.matrix[indexI][indexJ] = value;
     }
 
     private class IllegalStructureMatrixException extends Exception {
         public IllegalStructureMatrixException(String s) {
+        }
+    }
+
+    private class MatrixNotJoint extends Exception {
+        public MatrixNotJoint(String s) {
         }
     }
 }
