@@ -104,14 +104,14 @@ public class Matrix {
     public void set(int indexI, int indexJ, double value) {
         this.matrix[indexI][indexJ] = value;
     }
+}
 
-    private class IllegalStructureMatrixException extends Exception {
-        public IllegalStructureMatrixException(String s) {
-        }
+class IllegalStructureMatrixException extends Exception {
+    public IllegalStructureMatrixException(String s) {
     }
+}
 
-    private class MatrixNotJoint extends Exception {
-        public MatrixNotJoint(String s) {
-        }
+class MatrixNotJoint extends Exception {
+    public MatrixNotJoint(String s) {
     }
 }
