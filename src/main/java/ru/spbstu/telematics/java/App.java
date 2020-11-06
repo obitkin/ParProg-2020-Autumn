@@ -4,7 +4,9 @@ package ru.spbstu.telematics.java;
 Program for multiplication NumberOfMatrix=2 matrix.
 */
 
-public class App 
+import java.io.FileNotFoundException;
+
+public class App
 {
     static int NumberOfMatrix = 2; //must be >= 1
 
@@ -22,12 +24,25 @@ public class App
                 result = masMatrix[0];
 
                 for (int countOfMatrix = 1; countOfMatrix < NumberOfMatrix; countOfMatrix++){
-                    result = result.multiplication(masMatrix[countOfMatrix]);
+                    try {
+                        result = result.multiplication(masMatrix[countOfMatrix]);
+                    } catch (MatrixNotJoint ex) {
+                        throw new MatrixNotJoint("Can't multiply result to matrix № " + countOfMatrix);
+                    }
                 }
 
             }
-            catch (Exception ex) {
-
+            catch (NumberFormatException ex) {
+                System.out.println(ex.getMessage());
+            }
+            catch (FileNotFoundException ex) {
+                System.out.println(ex.getLocalizedMessage());
+            }
+            catch (IllegalStructureMatrixException ex) {
+                System.out.println(ex.getMessage());
+            }
+            catch (MatrixNotJoint ex) {
+                System.out.println(ex.getMessage());
             }
 
         } else {
