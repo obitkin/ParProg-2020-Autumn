@@ -6,14 +6,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
 
-
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collection;
 
-/**
- * Unit test for simple App.
- */
 @RunWith(Enclosed.class)
 public class MatrixTest {
 
@@ -24,6 +20,8 @@ public class MatrixTest {
     static String MatrixOk_5x5 = ".\\test\\MatrixOk_5x5.txt";
     static String MatrixStructureError = ".\\test\\MatrixStructureError.txt";
     static String MatrixOkResult_3x2 = ".\\test\\MatrixOkResult_3x2.txt";
+    static String MatrixOkResult_5x5 = ".\\test\\MatrixOkResult_5x5.txt";
+    static String FileNotFound = "";
 
     @RunWith(Parameterized.class)
     public static class StringToArrayDoubleTest {
@@ -37,7 +35,7 @@ public class MatrixTest {
                     { "0    .2     .0", new double[] {0,0.2,0} , null} ,
                     { "..1 2 3", null , new NumberFormatException()} ,
                     { "1ds 2 3sdf", null , new NumberFormatException()} ,
-                    { "0xf 0x2 0x3", null , new NumberFormatException()} ,
+                    { "0xf 0x2 0x3", null , new NumberFormatException()}
             });
         }
 
@@ -63,7 +61,6 @@ public class MatrixTest {
                 } catch (NumberFormatException ex) {
                     assertTrue(true);
                 }
-                return;
             }
         }
     }
@@ -84,14 +81,15 @@ public class MatrixTest {
                             {3, 4},
                             {2, 3}} , null} ,
                     { MatrixOk_5x5, new double[][] {
-                            {4, 54, 454, 43, 323},
-                            {32, 3, 23, 34, -1},
-                            {4, 43, 3, 0, 0},
-                            {3232, 3, 4, 3, -1},
-                            {3, 4, -1, 0, -43}} , null} ,
+                            {4,   -4,    1,	 -1,   3},
+                            {6,   3,     5,	 -4,   -1},
+                            {4,   -3,    3,   0,    0},
+                            {3,    3,    4,   3,   -1},
+                            {3,   4,     -1,  0,    0}} , null} ,
                     { MatrixStructureError, null , new IllegalStructureMatrixException()} ,
                     { MatrixFormatError, null , new NumberFormatException()} ,
                     { MatrixEmptyError, null , new NullPointerException()} ,
+                    { FileNotFound, null , new FileNotFoundException()}
             });
         }
 
@@ -142,6 +140,8 @@ public class MatrixTest {
                         { new Matrix(MatrixOk_4x2), new Matrix(MatrixOk_3x4) , null , new MatrixNotJoint()} ,
                         { new Matrix(MatrixOk_4x2), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
                         { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
+                        { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_3x4) , null , new MatrixNotJoint()} ,
+                        { new Matrix(MatrixOk_5x5), new Matrix(MatrixOk_5x5) , new Matrix(MatrixOkResult_5x5) , null}
                 });
             } catch (Exception ex) {
                 return null; //never happen, just because Matrix throw Exception
