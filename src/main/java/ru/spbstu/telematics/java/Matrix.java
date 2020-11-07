@@ -112,7 +112,20 @@ public class Matrix {
 
     @Override
     public String toString() {
-        return Arrays.toString(matrix);
+        return Arrays.deepToString(matrix);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Matrix matrix1 = (Matrix) o;
+        return Arrays.deepEquals(matrix, matrix1.matrix);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(matrix);
     }
 }
 
