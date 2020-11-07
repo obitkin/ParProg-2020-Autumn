@@ -17,7 +17,7 @@ public class Matrix {
         this.matrix = parseMatrix(filePath);
     }
 
-    private double[][] parseMatrix(String filePath) throws NumberFormatException,
+    static double[][] parseMatrix(String filePath) throws NumberFormatException,
             FileNotFoundException, IllegalStructureMatrixException {
 
         int rowsSize = 0;
@@ -61,7 +61,7 @@ public class Matrix {
         return matrixTmp;
     }
 
-    private double[] stringToArrayOfDouble(String str) throws NumberFormatException{
+    static double[] stringToArrayOfDouble(String str) throws NumberFormatException{
         String regex = " ";
         int realSizeOfOneRow = 0;
         String[] elementsOfOneString = str.split(regex);
@@ -103,7 +103,7 @@ public class Matrix {
     }
 
     public int getColumnSize() {
-        return this.matrix[0].length;
+        return (this.matrix.length > 0)? this.matrix[0].length : 0;
     }
 
     public void set(int indexI, int indexJ, double value) {
