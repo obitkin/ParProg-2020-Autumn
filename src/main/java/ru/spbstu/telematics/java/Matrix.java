@@ -67,7 +67,7 @@ public class Matrix {
         String[] elementsOfOneString = str.split(regex);
         double[] res = new double[elementsOfOneString.length];
         for (int i = 0; i < res.length; i++, realSizeOfOneRow++) {
-            if (!elementsOfOneString[i].equals(regex))
+            if (!elementsOfOneString[i].equals(""))
                 res[realSizeOfOneRow] = Double.parseDouble(elementsOfOneString[i]);
             else {
                 realSizeOfOneRow--;
