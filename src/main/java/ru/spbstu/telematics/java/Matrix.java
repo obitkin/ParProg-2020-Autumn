@@ -28,7 +28,12 @@ public class Matrix {
         while (Scan.hasNextLine() && Scan.hasNextDouble()){
 
             double[][] tmp = new double[++rowsSize][];
-            tmp = Arrays.copyOf(matrixTmp,matrixTmp.length);
+            if (matrixTmp != null) {
+                for (int i = 0; i < matrixTmp.length; i++) {
+                    tmp[i] = Arrays.copyOf(matrixTmp[i],matrixTmp[i].length);
+                }
+            }
+
             matrixTmp = tmp;
 
             try {
@@ -103,6 +108,11 @@ public class Matrix {
 
     public void set(int indexI, int indexJ, double value) {
         this.matrix[indexI][indexJ] = value;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(matrix);
     }
 }
 
