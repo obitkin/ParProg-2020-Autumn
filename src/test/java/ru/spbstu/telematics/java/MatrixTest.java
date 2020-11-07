@@ -23,6 +23,7 @@ public class MatrixTest {
     static String MatrixOk_4x2 = ".\\test\\MatrixOk_4x2.txt";
     static String MatrixOk_5x5 = ".\\test\\MatrixOk_5x5.txt";
     static String MatrixStructureError = ".\\test\\MatrixStructureError.txt";
+    static String MatrixOkResult_3x2 = ".\\test\\MatrixOkResult_3x2.txt";
 
     @RunWith(Parameterized.class)
     public static class StringToArrayDoubleTest {
@@ -58,7 +59,7 @@ public class MatrixTest {
             else {
                 try {
                     Matrix.stringToArrayOfDouble(input);
-                    assertTrue(false);
+                    fail();
                 } catch (NumberFormatException ex) {
                     assertTrue(true);
                 }
@@ -85,12 +86,12 @@ public class MatrixTest {
                     { MatrixOk_5x5, new double[][] {
                             {4, 54, 454, 43, 323},
                             {32, 3, 23, 34, -1},
-                            {4, 43, 3,0, 0},
+                            {4, 43, 3, 0, 0},
                             {3232, 3, 4, 3, -1},
                             {3, 4, -1, 0, -43}} , null} ,
-                    { MatrixStructureError, null , new IllegalStructureMatrixException("")} ,
+                    { MatrixStructureError, null , new IllegalStructureMatrixException()} ,
                     { MatrixFormatError, null , new NumberFormatException()} ,
-                    { MatrixEmptyError, null , null} ,
+                    { MatrixEmptyError, null , new NullPointerException()} ,
             });
         }
 
@@ -111,18 +112,17 @@ public class MatrixTest {
                 try {
                     assertTrue(Arrays.deepEquals(resultExcpected,Matrix.parseMatrix(inputPath)));
                 } catch (Exception ex) {
-                    assertTrue(false); //if we waiting for result, but get exception
+                    fail(); //if we waiting for result, but get exception
                 }
             } else {
                 try {
                     Matrix.parseMatrix(inputPath);
-                    assertTrue(false);
-
+                    fail();
                 } catch (Exception ex) {
                     if (ex.getClass().equals(exceptionExcepted.getClass())) {
                         assertTrue(true);
                     } else {
-                        assertTrue(false);
+                        fail();
                     }
                 }
             }
@@ -130,16 +130,56 @@ public class MatrixTest {
         }
     }
 
-    /*
+
     @RunWith(Parameterized.class)
-    public class MulMatrixTest {
+    public static class MulMatrixTest {
+
+        @Parameterized.Parameters
+        public static Collection<Object[]> data() {
+            try {
+                return Arrays.asList(new Object[][] {
+                        { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_4x2) , new Matrix(MatrixOkResult_3x2) , null} ,
+                        { new Matrix(MatrixOk_4x2), new Matrix(MatrixOk_3x4) , null , new MatrixNotJoint()} ,
+                        { new Matrix(MatrixOk_4x2), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
+                        { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
+                });
+            } catch (Exception ex) {
+                return null; //never happen, just because Matrix throw Exception
+            }
+        }
+
+        private Matrix leftMatrix;
+        private Matrix rightMatrix;
+        private Matrix resultExpected;
+        private Exception exceptionExpected;
+
+        public MulMatrixTest(Matrix leftMatrix, Matrix rightMatrix, Matrix resultExpected, Exception exceptionExpected) {
+            this.leftMatrix = leftMatrix;
+            this.rightMatrix = rightMatrix;
+            this.resultExpected = resultExpected;
+            this.exceptionExpected = exceptionExpected;
+        }
 
         @Test
-        public void testMulMatrix()
-        {
-            assertTrue( true );
+        public void testMulMatrix() {
+            if (exceptionExpected == null) {
+                try {
+                    assertEquals(resultExpected,leftMatrix.multiplication(rightMatrix));
+                } catch (Exception ex) {
+                    fail();
+                }
+            } else {
+                try {
+                    assertEquals(resultExpected,leftMatrix.multiplication(rightMatrix));
+                } catch (MatrixNotJoint ex) {
+                    if (ex.getClass().equals(exceptionExpected.getClass())) {
+                        assertTrue(true);
+                    } else {
+                        fail();
+                    }
+                }
+            }
         }
     }
-    */
-
 }
+
