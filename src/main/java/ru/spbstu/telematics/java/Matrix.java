@@ -13,12 +13,12 @@ public class Matrix {
     }
 
     public Matrix (String filePath) throws NumberFormatException,
-            FileNotFoundException, IllegalStructureMatrixException{
+            FileNotFoundException, IllegalStructureMatrixException, NullPointerException{
         this.matrix = parseMatrix(filePath);
     }
 
     static double[][] parseMatrix(String filePath) throws NumberFormatException,
-            FileNotFoundException, IllegalStructureMatrixException {
+            FileNotFoundException, IllegalStructureMatrixException, NullPointerException{
 
         int rowsSize = 0;
         int columnsSize = 0;
@@ -57,6 +57,9 @@ public class Matrix {
                 }
             }
         }
+        if (matrixTmp == null) {
+            throw new NullPointerException("Matrix is empty");
+        }
         Scan.close();
         return matrixTmp;
     }
@@ -77,15 +80,15 @@ public class Matrix {
         return res;
     }
 
-    public Matrix multiplication(Matrix other) throws MatrixNotJoint {
+    public Matrix multiplication(Matrix other) throws MatrixNotJoint{
         if (this.getColumnSize() != other.getRowSize()) {
-            throw new MatrixNotJoint("");
+            throw new MatrixNotJoint("Can't multiply matrixces");
         }
         Matrix res = new Matrix(this.getRowSize(), other.getColumnSize());
         for(int i = 0; i < res.getRowSize(); i++) {
             for (int j = 0; j < res.getColumnSize(); j++) {
                 int Sum = 0;
-                for (int k = 0; k < res.getColumnSize(); k++) {
+                for (int k = 0; k < this.getColumnSize(); k++) {
                     Sum += this.get(i,k) * other.get(k,j);
                 }
                 res.set(i,j,Sum);
@@ -131,10 +134,16 @@ public class Matrix {
 
 class IllegalStructureMatrixException extends Exception {
     public IllegalStructureMatrixException(String s) {
+        super(s);
     }
+
+    public IllegalStructureMatrixException() {};
 }
 
 class MatrixNotJoint extends Exception {
     public MatrixNotJoint(String s) {
+        super(s);
     }
+
+    public MatrixNotJoint() {};
 }

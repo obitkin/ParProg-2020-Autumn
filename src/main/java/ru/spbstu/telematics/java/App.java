@@ -1,7 +1,7 @@
 package ru.spbstu.telematics.java;
 
 /*
-Program for multiplication NumberOfMatrix=2 matrix.
+Program for multiplication NumberOfMatrix=2 matrixces.
 */
 
 import java.io.FileNotFoundException;
@@ -21,17 +21,16 @@ public class App
                     Matrixs[countOfMatrix] = new Matrix(args[countOfMatrix]);
                     System.out.println(Matrixs[countOfMatrix].toString());
                 }
+
                 result = Matrixs[0];
 
                 for (int countOfMatrix = 1; countOfMatrix < NumberOfMatrix; countOfMatrix++){
-                    try {
                         result = result.multiplication(Matrixs[countOfMatrix]);
-                    } catch (MatrixNotJoint ex) {
-                        throw new MatrixNotJoint("Can't multiply result to matrix № " + countOfMatrix);
-                    }
                 }
+
                 System.out.println(result.toString());
                 return 0;
+
             }
             catch (NumberFormatException ex) {
                 System.out.println(ex.getMessage());
@@ -48,6 +47,10 @@ public class App
             catch (MatrixNotJoint ex) {
                 System.out.println(ex.getMessage());
                 return 5;
+            }
+            catch (NullPointerException ex) {
+                System.out.println(ex.getMessage());
+                return 6;
             }
 
         } else {
