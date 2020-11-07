@@ -20,6 +20,8 @@ public class App
                 for (int countOfMatrix = 0; countOfMatrix < NumberOfMatrix; countOfMatrix++){
                     Matrixs[countOfMatrix] = new Matrix(args[countOfMatrix]);
                     System.out.println(Matrixs[countOfMatrix].toString());
+                    if (countOfMatrix + 1 != NumberOfMatrix)
+                        System.out.println("*");
                 }
 
                 result = Matrixs[0];
@@ -28,7 +30,7 @@ public class App
                         result = result.multiplication(Matrixs[countOfMatrix]);
                 }
 
-                System.out.println(result.toString());
+                System.out.println("==\n" + result.toString());
                 return 0;
 
             }

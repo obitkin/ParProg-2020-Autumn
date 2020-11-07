@@ -115,7 +115,18 @@ public class Matrix {
 
     @Override
     public String toString() {
-        return Arrays.deepToString(matrix);
+        String result = new String();
+        for (int i = 0; i < matrix.length; i++) {
+            result += "[ ";
+            for (int j = 0; j < matrix[i].length; j++) {
+                result += matrix[i][j] + " ";
+            }
+            if (i + 1 != matrix.length)
+                result += "]\n";
+            else
+                result += "]";
+        }
+        return result;
     }
 
     @Override
