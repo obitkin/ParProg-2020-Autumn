@@ -4,13 +4,15 @@ package ru.spbstu.telematics.java;
 Program for multiplication NumberOfMatrix=2 matrixces.
 */
 
+import javax.sound.midi.Soundbank;
 import java.io.FileNotFoundException;
 
 public class App
 {
     static int NumberOfMatrix = 2; //must be >= 1
 
-    public static int main( String[] args ) {
+    public static void main( String[] args ) {
+        System.out.println("---------------------------------------------------------------------");
         if(args.length == NumberOfMatrix) {
 
             Matrix result;
@@ -31,33 +33,26 @@ public class App
                 }
 
                 System.out.println("==\n" + result.toString());
-                return 0;
-
             }
             catch (NumberFormatException ex) {
                 System.out.println(ex.getMessage());
-                return 2;
             }
             catch (FileNotFoundException ex) {
                 System.out.println(ex.getLocalizedMessage());
-                return 3;
             }
             catch (IllegalStructureMatrixException ex) {
                 System.out.println(ex.getMessage());
-                return 4;
             }
             catch (MatrixNotJoint ex) {
                 System.out.println(ex.getMessage());
-                return 5;
             }
             catch (NullPointerException ex) {
                 System.out.println(ex.getMessage());
-                return 6;
             }
 
         } else {
             System.out.println("Require " +  NumberOfMatrix +" arguments. There are " + args.length);
-            return 1;
         }
+        System.out.println("---------------------------------------------------------------------");
     }
 }
