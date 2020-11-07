@@ -1,14 +1,20 @@
 package ru.spbstu.telematics.java;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.*;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import static org.junit.Assert.*;
+
+
+import java.io.FileNotFoundException;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Unit test for simple App.
  */
-public class MatrixTest extends TestCase
-{
+
+public class MatrixTest {
 
     String MatrixEmptyError = ".\\test\\MatrixEmptyError.txt";
     String MatrixFormatError = ".\\test\\MatrixFormatError.txt";
@@ -16,40 +22,72 @@ public class MatrixTest extends TestCase
     String MatrixOk_4x2 = ".\\test\\MatrixOk_4x2.txt";
     String MatrixOk_5x5 = ".\\test\\MatrixOk_5x5.txt";
     String MatrixStructureError = ".\\test\\MatrixStructureError.txt";
-    /**
-     * Create the test case
-     *
-     * @param testName name of the test case
-     */
-    public MatrixTest( String testName )
-    {
-        super( testName );
+
+    @Before
+    public void setUp() throws Exception {
+
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite()
-    {
-        return new TestSuite( MatrixTest.class );
+    @RunWith(Parameterized.class)
+    public class StringToArrayDoubleTest {
+
+        @Parameterized.Parameters
+        public Collection<Object[]> data() {
+            return Arrays.asList(new Object[][] {
+                    { "fdfd", new double[] {1,2,3} ,null}
+            });
+        }
+
+        private String input;
+        private double[] result;
+        NumberFormatException except;
+
+        public StringToArrayDoubleTest(String input, double[] result, NumberFormatException except) {
+            this.input = input;
+            this.result = result;
+            this.except = except;
+        }
+
+        @Test
+        public void testToArrayDouble() {
+            if(except == null) {
+                assertEquals(result,Matrix.stringToArrayOfDouble(input));
+            }
+            else {
+                try {
+                    Matrix.stringToArrayOfDouble(input);
+                    assertTrue(false);
+                } catch (NumberFormatException ex) {
+                    assertTrue(true);
+                }
+                return;
+            }
+        }
     }
 
-    /**
-     * Rigourous Test :-)
-     */
+    @RunWith(Parameterized.class)
+    public class ParseMatrixTest {
 
-    public void testToArrayDouble()
-    {
-        Matrix.stringToArrayOfDouble();
+        @Test
+        public void testParseMatrix()
+        {
+            try {
+                Matrix.parseMatrix(MatrixOk_3x4);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IllegalStructureMatrixException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void testParseMatrix()
-    {
-        Matrix.parseMatrix();
-    }
+    @RunWith(Parameterized.class)
+    public class MulMatrixTest {
 
-    public void testMulMatrix()
-    {
-        assertTrue( true );
+        @Test
+        public void testMulMatrix()
+        {
+            assertTrue( true );
+        }
     }
 }
