@@ -1,6 +1,7 @@
 package ru.spbstu.telematics.java;
 
 import org.junit.*;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import static org.junit.Assert.*;
@@ -13,7 +14,7 @@ import java.util.Collection;
 /**
  * Unit test for simple App.
  */
-
+@RunWith(Enclosed.class)
 public class MatrixTest {
 
     String MatrixEmptyError = ".\\test\\MatrixEmptyError.txt";
@@ -29,18 +30,23 @@ public class MatrixTest {
     }
 
     @RunWith(Parameterized.class)
-    public class StringToArrayDoubleTest {
+    public static class StringToArrayDoubleTest {
 
         @Parameterized.Parameters
-        public Collection<Object[]> data() {
+        public static Collection<Object[]> data() {
             return Arrays.asList(new Object[][] {
-                    { "fdfd", new double[] {1,2,3} ,null}
+                    { "1 2 3", new double[] {1,2,3} , null} ,
+                    { "1 2.3 -33", new double[] {1,2.3,-33} , null} ,
+                    { "1    2     000", new double[] {1,2,0} , null} ,
+                    { "aa1 d2 1d3", null , new NumberFormatException()} ,
+                    { "1ds 2 3sdf", null , new NumberFormatException()} ,
+                    { "0xf 0x2 0x3", null , new NumberFormatException()} ,
             });
         }
 
         private String input;
         private double[] result;
-        NumberFormatException except;
+        private NumberFormatException except;
 
         public StringToArrayDoubleTest(String input, double[] result, NumberFormatException except) {
             this.input = input;
@@ -51,7 +57,7 @@ public class MatrixTest {
         @Test
         public void testToArrayDouble() {
             if(except == null) {
-                assertEquals(result,Matrix.stringToArrayOfDouble(input));
+                assertArrayEquals(result, Matrix.stringToArrayOfDouble(input),0.001);
             }
             else {
                 try {
@@ -64,7 +70,7 @@ public class MatrixTest {
             }
         }
     }
-
+    /*
     @RunWith(Parameterized.class)
     public class ParseMatrixTest {
 
@@ -90,4 +96,6 @@ public class MatrixTest {
             assertTrue( true );
         }
     }
+    */
+
 }
