@@ -134,6 +134,7 @@ public class MatrixTest {
 
         @Parameterized.Parameters
         public static Collection<Object[]> data() {
+            Matrix tmp;
             try {
                 return Arrays.asList(new Object[][] {
                         { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_4x2) , new Matrix(MatrixOkResult_3x2) , null} ,
@@ -141,7 +142,8 @@ public class MatrixTest {
                         { new Matrix(MatrixOk_4x2), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
                         { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_5x5) , null , new MatrixNotJoint()} ,
                         { new Matrix(MatrixOk_3x4), new Matrix(MatrixOk_3x4) , null , new MatrixNotJoint()} ,
-                        { new Matrix(MatrixOk_5x5), new Matrix(MatrixOk_5x5) , new Matrix(MatrixOkResult_5x5) , null}
+                        { new Matrix(MatrixOk_5x5), new Matrix(MatrixOk_5x5) , new Matrix(MatrixOkResult_5x5) , null} ,
+                        {tmp = new Matrix(MatrixOk_5x5), tmp , new Matrix(MatrixOkResult_5x5) , null}
                 });
             } catch (Exception ex) {
                 return null; //never happen, just because Matrix throw Exception

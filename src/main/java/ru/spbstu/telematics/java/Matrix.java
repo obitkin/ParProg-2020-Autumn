@@ -20,14 +20,14 @@ public class Matrix {
     static double[][] parseMatrix(String filePath) throws NumberFormatException,
             FileNotFoundException, IllegalStructureMatrixException, NullPointerException{
 
-        int rowsSize = 0;
-        int columnsSize = 0;
+        int height = 0;
+        int width = 0;
         double[][] matrixTmp = null;
 
         Scanner Scan = new Scanner(new FileReader(filePath));
         while (Scan.hasNextLine() && Scan.hasNextDouble()){
 
-            double[][] tmp = new double[++rowsSize][];
+            double[][] tmp = new double[++height][];
             if (matrixTmp != null) {
                 for (int i = 0; i < matrixTmp.length; i++) {
                     tmp[i] = Arrays.copyOf(matrixTmp[i],matrixTmp[i].length);
@@ -37,23 +37,23 @@ public class Matrix {
             matrixTmp = tmp;
 
             try {
-                matrixTmp[rowsSize - 1] = stringToArrayOfDouble(Scan.nextLine());
+                matrixTmp[height - 1] = stringToArrayOfDouble(Scan.nextLine());
             } catch (NumberFormatException ex) {
-                throw new NumberFormatException("Can't read string № " + (rowsSize - 1));
+                throw new NumberFormatException("Can't read string № " + (height - 1));
             }
 
-            if (columnsSize == 0) {
-                columnsSize = matrixTmp[rowsSize - 1].length;
+            if (width == 0) {
+                width = matrixTmp[height - 1].length;
             }
             else {
-                if (columnsSize != matrixTmp[rowsSize - 1].length) {
+                if (width != matrixTmp[height - 1].length) {
                     throw new IllegalStructureMatrixException(
                             "columnsSize of string № " +
-                            (rowsSize - 1) +
+                            (height - 1) +
                             " == " +
-                            matrixTmp[rowsSize - 1].length +
+                            matrixTmp[height - 1].length +
                             " columnsSize of previous string == " +
-                            columnsSize);
+                                    width);
                 }
             }
         }
@@ -81,14 +81,14 @@ public class Matrix {
     }
 
     public Matrix multiplication(Matrix other) throws MatrixNotJoint{
-        if (this.getColumnSize() != other.getRowSize()) {
+        if (this.getWidth() != other.getHeight()) {
             throw new MatrixNotJoint("Can't multiply matrixces");
         }
-        Matrix res = new Matrix(this.getRowSize(), other.getColumnSize());
-        for(int i = 0; i < res.getRowSize(); i++) {
-            for (int j = 0; j < res.getColumnSize(); j++) {
+        Matrix res = new Matrix(this.getHeight(), other.getWidth());
+        for(int i = 0; i < res.getHeight(); i++) {
+            for (int j = 0; j < res.getWidth(); j++) {
                 int Sum = 0;
-                for (int k = 0; k < this.getColumnSize(); k++) {
+                for (int k = 0; k < this.getWidth(); k++) {
                     Sum += this.get(i,k) * other.get(k,j);
                 }
                 res.set(i,j,Sum);
@@ -101,11 +101,11 @@ public class Matrix {
         return this.matrix[i][j];
     }
 
-    public int getRowSize() {
+    public int getHeight() {
         return this.matrix.length;
     }
 
-    public int getColumnSize() {
+    public int getWidth() {
         return (this.matrix.length > 0)? this.matrix[0].length : 0;
     }
 
