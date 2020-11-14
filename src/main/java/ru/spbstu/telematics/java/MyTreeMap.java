@@ -13,7 +13,6 @@ public class MyTreeMap<K,V>
     int size;
 
 
-
     public MyTreeMap() {
         this.comparator = null;
         this.root = null;
@@ -25,7 +24,7 @@ public class MyTreeMap<K,V>
        return binaryTreeTaversalForSet(root);
     }
 
-    private <K,V> Set<Map.Entry<K,V>> binaryTreeTaversalForSet(MyTreeMap.Entry<K,V> node) {
+    private Set<Map.Entry<K,V>> binaryTreeTaversalForSet(MyTreeMap.Entry<K,V> node) {
         Set<Map.Entry<K,V>> set = null;
         if (node != null) {
             set = new HashSet<>();
@@ -38,6 +37,25 @@ public class MyTreeMap<K,V>
         return set;
     }
 
+    private Entry<K,V> getEntry(Object key) {
+        Comparable<? super K> k = null;
+        if (comparator == null)
+            k = (Comparable<? super K>) key;
+        Objects.requireNonNull(key);
+
+        Entry<K,V> p = root;
+        while (p != null) {
+            int cmp = (k == null) ? comparator.compare((K)key,p.key) : k.compareTo(p.key);
+            if (cmp < 0)
+                p = p.left;
+            else if (cmp > 0)
+                p = p.right;
+            else
+                return p;
+        }
+        return null;
+    }
+
     @Override
     public V put(K key, V value) {
         if(root == null) {
@@ -45,19 +63,25 @@ public class MyTreeMap<K,V>
             size =  1;
             return null;
         }
-        if (containsKey(key)) {
-            V oldValue = get(key);
-            insert(key,value,root);
-            return oldValue;
+        Entry<K,V> p = getEntry(key);
+        if (p != null) {
+            return p.setValue(value);
         }
         insert(key,value,root);
         return null;
+    }
+
+    @Override
+    public V get(Object key) {
+        Entry<K,V> p = getEntry(key);
+        return (p==null ? null : p.value);
     }
 
     Entry<K,V> insert(K key, V value, Entry<K,V> t){
         if(t == null){
             return new Entry<>(key,value);
         }
+
         int cmp;
         if (comparator != null) {
             cmp = comparator.compare(key,t.key);
@@ -72,8 +96,8 @@ public class MyTreeMap<K,V>
         else if (cmp > 0) {
             t.right = insert(key,value,t.right);
         }
-        else if (cmp == 0) {
-            t.value = value;
+        else {
+            t.value = value; //can't be cause search before inserting
         }
 
         t = skew(t);
@@ -113,6 +137,10 @@ public class MyTreeMap<K,V>
             return t;
     }
 
+    @Override
+    public V remove(Object key) {
+        return super.remove(key);
+    }
 
     static final class Entry<K,V> implements Map.Entry<K,V> {
         K key;
@@ -121,7 +149,7 @@ public class MyTreeMap<K,V>
         Entry<K, V> right;
         int level;
 
-        Entry(K key,V value, int level, Entry left, Entry right){
+        Entry(K key,V value, int level, Entry<K,V> left, Entry<K,V> right){
             this.key = key;
             this.value = value;
             this.level = level;
