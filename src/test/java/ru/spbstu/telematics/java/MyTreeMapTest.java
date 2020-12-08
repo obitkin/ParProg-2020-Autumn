@@ -10,7 +10,7 @@ import java.util.*;
 class MyTreeMapTest {
 
     static int size = 10;
-    static int max = 100;
+    static int Mod = 0;
     static final Random random = new Random();
 
     static Map<String,Double> treeMap;
@@ -30,7 +30,6 @@ class MyTreeMapTest {
     void TestForMap() {
         assertEquals(treeMap.isEmpty(),myTreeMap.isEmpty());
         assertEquals(treeMap.size(),myTreeMap.size());
-
         Set<String> k1 = treeMap.keySet();
         Set<String> k2 = myTreeMap.keySet();
 
@@ -67,6 +66,28 @@ class MyTreeMapTest {
 
         treeMap.entrySet().remove(5.0);
         myTreeMap.entrySet().remove(5.0);
+
+        k1 = treeMap.keySet();
+        k2 = myTreeMap.keySet();
+        try {
+            for (String i : k1){
+                System.out.println(i + " " + treeMap.get(i));
+                treeMap.remove(i);
+            }
+        }catch (ConcurrentModificationException ex) {
+            System.out.println(ex);
+        }
+
+        System.out.println("---------------");
+        try {
+            for (String i : k2){
+                System.out.println(i + " " + myTreeMap.get(i));
+                myTreeMap.remove(i);
+            }
+        }catch (ConcurrentModificationException ex) {
+            System.out.println(ex);
+        }
+
         assertEquals(treeMap.size(),myTreeMap.size());
 
         treeMap.clear();
