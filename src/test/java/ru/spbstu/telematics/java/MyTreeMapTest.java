@@ -30,10 +30,24 @@ class MyTreeMapTest {
     void TestForMap() {
         assertEquals(treeMap.isEmpty(),myTreeMap.isEmpty());
         assertEquals(treeMap.size(),myTreeMap.size());
+
+        Set<String> k1 = treeMap.keySet();
+        Set<String> k2 = myTreeMap.keySet();
+
+        for (String i : k1) {
+            System.out.println(i + " " + treeMap.get(i));
+        }
+        System.out.println("-------------");
+        for (String i : k2) {
+            System.out.println(i + " " + myTreeMap.get(i));
+        }
+
         for (int i = 0; i < myTreeMap.size() / 2; i++ ) {
             myTreeMap.remove(String.valueOf(i*i));
             treeMap.remove(String.valueOf(i*i));
         }
+        System.out.println("-------------");
+        assertEquals(treeMap.containsKey("16"),myTreeMap.containsKey("16"));
 
         Collection<Double> v1 = treeMap.values();
         Collection<Double> v2 = myTreeMap.values();
@@ -44,21 +58,21 @@ class MyTreeMapTest {
             System.out.println(i);
         }
         System.out.println("---------------");
+
         for (Double i : v2) {
             System.out.println(i);
         }
 
         System.out.println("---------------");
 
-        myTreeMap.remove("4");
-        Set<MyTreeMap.Entry<String,Double>> t2 = myTreeMap.entrySet();
+        treeMap.entrySet().remove(5.0);
+        myTreeMap.entrySet().remove(5.0);
+        assertEquals(treeMap.size(),myTreeMap.size());
 
-        for (MyTreeMap.Entry<String, Double> i : t2) {
-            System.out.println(i);
+        treeMap.clear();
+        myTreeMap.clear();
 
-        }
 
-        myTreeMap.put("De",2.0);
     }
 
 
