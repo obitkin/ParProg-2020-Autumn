@@ -14,7 +14,7 @@ class MyTreeMapTest {
     static final Random random = new Random();
 
     static Map<String,Double> treeMap;
-    static Map<String,Double> myTreeMap;
+    static MyTreeMap<String,Double> myTreeMap;
 
     @BeforeAll
     static void setUp() {
@@ -33,8 +33,9 @@ class MyTreeMapTest {
         for (Map.Entry<String, Double> i : t1) {
             i.setValue((double)(i.getValue()+6));
         }
-        Set<Map.Entry<String,Double>> t2 = myTreeMap.entrySet();
-        for (Map.Entry<String, Double> i : t2) {
+
+        Set<MyTreeMap.Entry<String,Double>> t2 = myTreeMap.entrySet();
+        for (MyTreeMap.Entry<String, Double> i : t2) {
             i.setValue((double)i.getValue()+3);
         }
     }
