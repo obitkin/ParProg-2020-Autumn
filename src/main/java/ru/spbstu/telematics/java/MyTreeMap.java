@@ -9,6 +9,7 @@ public class MyTreeMap<K,V>{
     private Entry<K,V> root;
 
     int size = 0;
+    int Mod = 0;
 
     public MyTreeMap() {
         this.comparator = null;
@@ -19,6 +20,7 @@ public class MyTreeMap<K,V>{
     public void clear(){
         size = 0;
         root = null;
+        Mod++;
     }
 
 
@@ -87,6 +89,7 @@ public class MyTreeMap<K,V>{
         }
         insert(key,value);
         size++;
+        Mod++;
         return null;
     }
 
@@ -128,6 +131,7 @@ public class MyTreeMap<K,V>{
         V oldValue = p.value;
         deleteEntry(p);
         size--;
+        Mod++;
         return oldValue;
     }
 
@@ -136,6 +140,7 @@ public class MyTreeMap<K,V>{
         for (MyTreeMap.Entry<? extends K, ? extends V> i : t2) {
            this.put(i.getKey(),i.getValue());
         }
+        Mod++;
     }
 
     private void deleteEntry(Entry<K,V> p) {
@@ -185,8 +190,10 @@ public class MyTreeMap<K,V>{
 
     public class TreeIterator implements Iterator<Entry<K,V>>{
         private Entry<K,V> next;
+        int expected;
 
         public TreeIterator(Entry<K,V> root) {
+            expected = Mod;
             next = root;
             if(next == null)
                 return;
@@ -201,6 +208,9 @@ public class MyTreeMap<K,V>{
 
         public Entry<K,V> next(){
             if(!hasNext()) throw new NoSuchElementException();
+            if (expected != Mod) {
+                throw new ConcurrentModificationException();
+            }
             Entry<K,V> r = next;
 
             if(next.right != null) {
@@ -264,8 +274,9 @@ public class MyTreeMap<K,V>{
 
     public class TreeIteratorKey implements Iterator<K>{
         private Entry<K,V> next;
-
+        int expected;
         public TreeIteratorKey(Entry<K,V> root) {
+            expected = Mod;
             next = root;
             if(next == null)
                 return;
@@ -280,6 +291,9 @@ public class MyTreeMap<K,V>{
 
         public K next(){
             if(!hasNext()) throw new NoSuchElementException();
+            if (expected != Mod) {
+                throw new ConcurrentModificationException();
+            }
             Entry<K,V> r = next;
 
             if(next.right != null) {
@@ -343,8 +357,9 @@ public class MyTreeMap<K,V>{
 
     public class TreeIteratorValue implements Iterator<V>{
         private Entry<K,V> next;
-
+        private int expected;
         public TreeIteratorValue(Entry<K,V> root) {
+            expected = Mod;
             next = root;
             if(next == null)
                 return;
@@ -359,6 +374,9 @@ public class MyTreeMap<K,V>{
 
         public V next(){
             if(!hasNext()) throw new NoSuchElementException();
+            if (expected != Mod) {
+                throw new ConcurrentModificationException();
+            }
             Entry<K,V> r = next;
 
             if(next.right != null) {
