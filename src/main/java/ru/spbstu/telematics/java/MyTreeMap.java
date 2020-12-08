@@ -127,6 +127,7 @@ public class MyTreeMap<K,V>{
 
         V oldValue = p.value;
         deleteEntry(p);
+        size--;
         return oldValue;
     }
 
@@ -156,14 +157,13 @@ public class MyTreeMap<K,V>{
             V value = deletion.getValue();
             p.key = key;
             p.setValue(value);
-            if (p == root) {
-                return;
-            }
-            if (deletion.father.left == deletion) {
-                deletion.father.left = deletion.right;
+            if (deletion.father.right == deletion) {
+                deletion.father.right = deletion.right;
             }
             else {
-                deletion.father.right = deletion.right;
+                deletion.father.left = deletion.right;
+                if (deletion.right != null)
+                    deletion.right.father = deletion.father;
             }
         }
         else {
@@ -172,14 +172,13 @@ public class MyTreeMap<K,V>{
             V value = deletion.getValue();
             p.key = key;
             p.setValue(value);
-            if (p == root) {
-                return;
-            }
             if (deletion.father.left == deletion) {
                 deletion.father.left = deletion.left;
             }
             else {
                 deletion.father.right = deletion.left;
+                if (deletion.left != null)
+                    deletion.left.father = deletion.father;
             }
         }
     }
