@@ -9,7 +9,7 @@ import java.util.*;
 
 class MyTreeMapTest {
 
-    static int size = 3;
+    static int size = 10;
     static int max = 100;
     static final Random random = new Random();
 
@@ -29,25 +29,23 @@ class MyTreeMapTest {
     @Test
     void TestForMap() {
         assertEquals(treeMap.size(),myTreeMap.size());
+
         Set<Map.Entry<String,Double>> t1 = treeMap.entrySet();
+
         for (Map.Entry<String, Double> i : t1) {
             i.setValue((double)(i.getValue()+6));
+            t1.remove(i.getValue());
         }
+
+        Set<String>  tt = treeMap.keySet();
+
 
         Set<MyTreeMap.Entry<String,Double>> t2 = myTreeMap.entrySet();
         for (MyTreeMap.Entry<String, Double> i : t2) {
             i.setValue((double)i.getValue()+3);
+            System.out.println(i);
         }
     }
 
-    @Test
-    void TestForSortedMap() {
-        //assertEquals(treeMap.size(),myTreeMap.size());
-    }
-
-    @Test
-    void TestForNavigableMap() {
-        //assertEquals(treeMap.size(),myTreeMap.size());
-    }
 
 }
