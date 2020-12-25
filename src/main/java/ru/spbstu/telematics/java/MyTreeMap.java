@@ -142,7 +142,7 @@ public class MyTreeMap<K,V> implements Map<K,V>{
             }
         }
         else if(p.left == null) {
-            Entry<K,V> deletion = p.findMinRight();
+            Entry<K,V> deletion = p.findMinRight(); //next
             K key = deletion.getKey();
             V value = deletion.getValue();
             p.key = key;
@@ -358,6 +358,8 @@ public class MyTreeMap<K,V> implements Map<K,V>{
             if (Mod != expectedModCount)
                 throw new ConcurrentModificationException();
             deleteEntry(lastReturned);
+            if (next != null)
+                next = getEntry(next.getKey());
             expectedModCount = Mod;
             lastReturned = null;
         }
@@ -393,11 +395,11 @@ public class MyTreeMap<K,V> implements Map<K,V>{
     /* Класс вершина дерева */
 
     static class Entry<K, V> implements Map.Entry<K, V>{
-        private K key;
-        private V value;
-        private Entry<K, V> left;
-        private Entry<K, V> right;
-        private Entry<K, V> father;
+        K key;
+        V value;
+        Entry<K, V> left;
+        Entry<K, V> right;
+        Entry<K, V> father;
 
         Entry(K key,V value, Entry<K,V> left, Entry<K,V> right, Entry<K,V> father){
             this.key = key;
