@@ -42,6 +42,7 @@ public class MyTreeMapTest {
         Iterator<?> KeyIterator1 = left.keySet().iterator();
         Iterator<?> KeyIterator2 = right.keySet().iterator();
 
+        /*
         System.out.println("\n\n\n");
         while (KeyIterator1.hasNext() || KeyIterator2.hasNext()) {
             Object o1;
@@ -60,7 +61,7 @@ public class MyTreeMapTest {
                 System.out.println(o2.toString() + ": " + right.get(o2));
             }
         }
-
+        */
         KeyIterator1 = left.keySet().iterator();
         KeyIterator2 = right.keySet().iterator();
 
@@ -274,31 +275,32 @@ public class MyTreeMapTest {
     }
 
     @Test
-    public void TestRandomModificationSets() {
+    public void TestRandomModificationIteratorOfSets() {
 
         setUp(size);
         checkEquals(treeMap,myTreeMap);
-        Iterator<Double> it1 = treeMap.keySet().iterator();
-        Iterator<Double> it2 = myTreeMap.keySet().iterator();
+        Iterator<?> it1 = treeMap.keySet().iterator();
+        Iterator<?> it2 = myTreeMap.keySet().iterator();
 
         while (it1.hasNext()) {
             boolean remove = random.nextBoolean();
-            System.out.println(it1.next());
+            it1.next();
             it2.next();
             if (remove) {
                 it1.remove();
-                System.out.println("  Removed");
-                //it2.remove();
+                it2.remove();
             }
         }
         checkEquals(treeMap,myTreeMap);
-/*
+
         setUp(size*4);
         it1 = treeMap.values().iterator();
         it2 = myTreeMap.values().iterator();
 
         while (it1.hasNext() || it2.hasNext()) {
             boolean remove = random.nextBoolean();
+            it1.next();
+            it2.next();
             if (remove) {
                 it1.remove();
                 it2.remove();
@@ -312,12 +314,14 @@ public class MyTreeMapTest {
 
         while (it1.hasNext() || it2.hasNext()) {
             boolean remove = random.nextBoolean();
+            it1.next();
+            it2.next();
             if (remove) {
                 it1.remove();
                 it2.remove();
             }
         }
         checkEquals(treeMap,myTreeMap);
-        */
+
     }
 }
