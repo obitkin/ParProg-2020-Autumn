@@ -11,8 +11,9 @@ import java.util.*;
 
 public class MyTreeMapTest {
 
+    static int numberTest = 10000;
     static int size = 25;
-    static int Mod = 150;
+    static int mod = 150;
     static final Random random = new Random(2);
 
     String value = new String("Const Value for put without adding new entry");
@@ -20,7 +21,7 @@ public class MyTreeMapTest {
     static Map<Double,String> treeMap;
     static Map<Double,String> myTreeMap;
 
-    static void setUp() {
+    static void setUp(int size) {
         treeMap = new TreeMap<>();
         myTreeMap = new MyTreeMap<>();
 
@@ -30,16 +31,18 @@ public class MyTreeMapTest {
         }
     }
 
-    void CheckEquals(Map<?,?> left, Map<?,?> right) {
+    void checkEquals(Map<?,?> left, Map<?,?> right) {
         if (left == null && right == null)
             return;
 
         assertEquals(left.isEmpty(),right.isEmpty());
         assertEquals(left.size(),right.size());
 
+
         Iterator<?> KeyIterator1 = left.keySet().iterator();
         Iterator<?> KeyIterator2 = right.keySet().iterator();
 
+        System.out.println("\n\n\n");
         while (KeyIterator1.hasNext() || KeyIterator2.hasNext()) {
             Object o1;
             Object o2;
@@ -95,19 +98,17 @@ public class MyTreeMapTest {
     }
 
     @Test
-    public void TestForMap() {
-        setUp();
-        CheckEquals(treeMap,myTreeMap);
-
-        System.out.println("\n\n\n");
+    public void TestRandomModification() {
+        setUp(size);
+        checkEquals(treeMap,myTreeMap);
 
         /* 10000 random operation on TreeMap and MyTreemap
         *  50% for put
         *  50% for remove
         * */
 
-        for (int i = 0; i < 10000; i++){
-            int r  = random.nextInt(250);
+        for (int i = 0; i < numberTest; i++){
+            int r  = random.nextInt(mod);
             boolean add = random.nextBoolean();
             boolean constValue = random.nextBoolean();
             if (add) {
@@ -127,75 +128,196 @@ public class MyTreeMapTest {
                 myTreeMap.remove((double)r));
             }
         }
-        CheckEquals(treeMap,myTreeMap);
-/*
-        Set<Double> k1 = treeMap.keySet();
-        Set<Double> k2 = myTreeMap.keySet();
-
-        for (String i : k1) {
-            System.out.println(i + " " + treeMap.get(i));
-        }
-        System.out.println("-------------");
-        for (String i : k2) {
-            System.out.println(i + " " + myTreeMap.get(i));
-        }
-
-        for (int i = 0; i < myTreeMap.size() / 2; i++ ) {
-            myTreeMap.remove(String.valueOf(i*i));
-            treeMap.remove(String.valueOf(i*i));
-        }
-        System.out.println("-------------");
-        assertEquals(treeMap.containsKey("16"),myTreeMap.containsKey("16"));
-
-        Collection<Double> v1 = treeMap.values();
-        Collection<Double> v2 = myTreeMap.values();
-
-        assertEquals(treeMap.size(),myTreeMap.size());
-
-        for (Double i : v1) {
-            System.out.println(i);
-        }
-        System.out.println("---------------");
-
-        for (Double i : v2) {
-            System.out.println(i);
-        }
-
-        System.out.println("---------------");
-
-        treeMap.entrySet().remove(5.0);
-        myTreeMap.entrySet().remove(5.0);
-
-        k1 = treeMap.keySet();
-        k2 = myTreeMap.keySet();
-        try {
-            for (String i : k1){
-                System.out.println(i + " " + treeMap.get(i));
-                treeMap.remove(i);
-            }
-        }catch (ConcurrentModificationException ex) {
-            System.out.println(ex);
-        }
-
-        System.out.println("---------------");
-        try {
-            for (String i : k2){
-                System.out.println(i + " " + myTreeMap.get(i));
-                myTreeMap.remove(i);
-            }
-        }catch (ConcurrentModificationException ex) {
-            System.out.println(ex);
-        }
-
-        assertEquals(treeMap.size(),myTreeMap.size());
-
-        treeMap.clear();
-        myTreeMap.clear();
-
-*/
+        checkEquals(treeMap,myTreeMap);
     }
 
+    @Test
+    public void TestConcurrentModification() {
+        setUp(size);
+        boolean t1, t2;
+        checkEquals(treeMap,myTreeMap);
+
+        try {
+            for (Double i : treeMap.keySet()) {
+                treeMap.remove(i);
+            }
+            t1 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t1 = true; //ConcurrentModificationException happened
+        }
+
+        try {
+            for (Double i : myTreeMap.keySet()) {
+                myTreeMap.remove(i);
+            }
+            t2 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t2 = true; //ConcurrentModificationException happened
+        }
+        assertEquals(t1,t2);
+
+        setUp(size);
+        try {
+            for (Double i : treeMap.keySet()) {
+                treeMap.put((double)mod,value);
+            }
+            t1 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t1 = true; //ConcurrentModificationException happened
+        }
+
+        try {
+            for (Double i : myTreeMap.keySet()) {
+                myTreeMap.put((double)mod,value);
+            }
+            t2 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t2 = true; //ConcurrentModificationException happened
+        }
+        assertEquals(t1,t2);
 
 
+        setUp(size);
+        try {
+            for (String i : treeMap.values()) {
+                treeMap.remove((double)0);
+            }
+            t1 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t1 = true; //ConcurrentModificationException happened
+        }
 
+        try {
+            for (String i : myTreeMap.values()) {
+                myTreeMap.remove((double)0);
+            }
+            t2 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t2 = true; //ConcurrentModificationException happened
+        }
+        assertEquals(t1,t2);
+
+        setUp(size);
+        try {
+            for (String i : treeMap.values()) {
+                treeMap.put((double)mod,i);
+            }
+            t1 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t1 = true; //ConcurrentModificationException happened
+        }
+
+        try {
+            for (String i : myTreeMap.values()) {
+                myTreeMap.put((double)mod,i);
+            }
+            t2 = false; //ConcurrentModificationException didn't happen
+        } catch (ConcurrentModificationException ex) {
+            t2 = true; //ConcurrentModificationException happened
+        }
+        assertEquals(t1,t2);
+    }
+
+    @Test
+    public void TestNoSuchElementException() {
+        setUp(size);
+        boolean t1, t2;
+        checkEquals(treeMap,myTreeMap);
+        Iterator<?> it1 = treeMap.keySet().iterator();
+        Iterator<?> it2 = myTreeMap.keySet().iterator();
+
+        t1 = false;
+        try {
+            while (true) {
+                it1.next();
+            }
+        } catch (NoSuchElementException ex) {
+            t1 = true;
+        }
+
+        t2 = false;
+        try {
+            while (true) {
+                it2.next(); //i know that it will be interrupted
+            }
+        } catch (NoSuchElementException ex) {
+            t2 = true;
+        }
+        assertEquals(t1,t2);
+    }
+
+    @Test
+    public void TestContainsAndGet() {
+        setUp(size);
+
+        for (Double i : treeMap.keySet()) {
+            assertTrue(myTreeMap.containsKey(i));
+            assertEquals(treeMap.get(i),myTreeMap.get(i));
+        }
+
+        for (Double i : myTreeMap.keySet()) {
+            assertTrue(treeMap.containsKey(i));
+            assertEquals(myTreeMap.get(i),treeMap.get(i));
+        }
+
+        for (String i : treeMap.values()) {
+            assertTrue(myTreeMap.containsValue(i));
+        }
+
+        for (String i : myTreeMap.values()) {
+            assertTrue(treeMap.containsValue(i));
+        }
+
+        for (double i = 0; i < size + 20; i++) {
+            assertEquals(treeMap.get(i),myTreeMap.get(i));  //in containers only 0..size
+        }
+    }
+
+    @Test
+    public void TestRandomModificationSets() {
+
+        setUp(size);
+        checkEquals(treeMap,myTreeMap);
+        Iterator<Double> it1 = treeMap.keySet().iterator();
+        Iterator<Double> it2 = myTreeMap.keySet().iterator();
+
+        while (it1.hasNext()) {
+            boolean remove = random.nextBoolean();
+            System.out.println(it1.next());
+            it2.next();
+            if (remove) {
+                it1.remove();
+                System.out.println("  Removed");
+                //it2.remove();
+            }
+        }
+        checkEquals(treeMap,myTreeMap);
+/*
+        setUp(size*4);
+        it1 = treeMap.values().iterator();
+        it2 = myTreeMap.values().iterator();
+
+        while (it1.hasNext() || it2.hasNext()) {
+            boolean remove = random.nextBoolean();
+            if (remove) {
+                it1.remove();
+                it2.remove();
+            }
+        }
+        checkEquals(treeMap,myTreeMap);
+
+        setUp(size*4);
+        it1 = treeMap.entrySet().iterator();
+        it2 = myTreeMap.entrySet().iterator();
+
+        while (it1.hasNext() || it2.hasNext()) {
+            boolean remove = random.nextBoolean();
+            if (remove) {
+                it1.remove();
+                it2.remove();
+            }
+        }
+        checkEquals(treeMap,myTreeMap);
+        */
+    }
 }

@@ -118,7 +118,6 @@ public class MyTreeMap<K,V> implements Map<K,V>{
 
         V oldValue = p.value;
         deleteEntry(p);
-        size--;
         Mod++;
         return oldValue;
     }
@@ -176,6 +175,7 @@ public class MyTreeMap<K,V> implements Map<K,V>{
                     deletion.left.father = deletion.father;
             }
         }
+        size--;
     }
 
     /* Множества вершин, ключей, значений, а также методы, возвращающие их */
@@ -357,9 +357,6 @@ public class MyTreeMap<K,V> implements Map<K,V>{
                 throw new IllegalStateException();
             if (Mod != expectedModCount)
                 throw new ConcurrentModificationException();
-            // deleted entries are replaced by their successors
-            if (lastReturned.left != null && lastReturned.right != null)
-                next = lastReturned;
             deleteEntry(lastReturned);
             expectedModCount = Mod;
             lastReturned = null;
