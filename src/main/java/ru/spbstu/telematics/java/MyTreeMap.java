@@ -2,9 +2,7 @@ package ru.spbstu.telematics.java;
 
 import java.util.*;
 
-public class MyTreeMap<K,V>{
-
-    private final Comparator<? super K> comparator;
+public class MyTreeMap<K,V> implements Map<K,V>{
 
     private Entry<K,V> root;
 
@@ -12,42 +10,36 @@ public class MyTreeMap<K,V>{
     int Mod = 0;
 
     public MyTreeMap() {
-        this.comparator = null;
         this.root = null;
         this.size = 0;
     }
 
+    @Override
     public void clear(){
         size = 0;
         root = null;
-        Mod++;
+        Mod = 0;
     }
 
-
-    public Set<K> keySet() {
-        return new KeySet();
-    }
-
-    public Collection<V> values() {
-        return new Values();
-    }
-
+    @Override
     public int size(){
         return size;
     }
 
-
+    @Override
     public boolean isEmpty() {
         return size() == 0;
     }
 
+    @Override
     public boolean containsKey(Object key) {
         return getEntry(key) != null;
     }
 
+    @Override
     public boolean containsValue(Object value) {
-        Set<Entry<K,V>> t2 = entrySet();
-        for (Entry<K,V> i : t2) {
+        Set<Map.Entry<K,V>> t2 = entrySet();
+        for (Map.Entry<K,V> i : t2) {
             if (i.getValue().equals(value))
                 return true;
         }
@@ -55,14 +47,12 @@ public class MyTreeMap<K,V>{
     }
 
     private Entry<K,V> getEntry(Object key) {
-        Comparable<? super K> k = null;
-        if (comparator == null)
-            k = (Comparable<? super K>) key;
+        Comparable<? super K> k = (Comparable<? super K>) key;
         Objects.requireNonNull(key);
 
         Entry<K,V> p = root;
         while (p != null) {
-            int cmp = (k == null) ? comparator.compare((K)key,p.key) : k.compareTo(p.key);
+            int cmp = k.compareTo(p.key);
             if (cmp < 0)
                 p = p.left;
             else if (cmp > 0)
@@ -73,10 +63,7 @@ public class MyTreeMap<K,V>{
         return null;
     }
 
-    public Set<Entry<K, V>> entrySet() {
-        return new EntrySet();
-    }
-
+    @Override
     public V put(K key, V value) {
         if(root == null) {
             root = new Entry<K,V>(key,value,null);
@@ -93,14 +80,13 @@ public class MyTreeMap<K,V>{
         return null;
     }
 
-    void insert(K key, V value){
-        Comparable<? super K> k = null;
-        if (comparator == null)
-            k = (Comparable<? super K>) key;
+    private void insert(K key, V value){
+        Comparable<? super K> k = (Comparable<? super K>) key;
         Objects.requireNonNull(key);
+
         Entry<K,V> t = root;
         while (t != null) {
-            int cmp = (k == null) ? comparator.compare((K)key,t.key) : k.compareTo(t.key);
+            int cmp = k.compareTo(t.key);
             if (cmp < 0)
                 if (t.left == null) {
                     t.left = new Entry<>(key, value, t);
@@ -118,11 +104,13 @@ public class MyTreeMap<K,V>{
         }
     }
 
+    @Override
     public V get(Object key) {
         Entry<K,V> p = getEntry(key);
         return (p==null ? null : p.value);
     }
 
+    @Override
     public V remove(Object key) {
         Entry<K,V> p = getEntry(key);
         if (p == null)
@@ -135,12 +123,10 @@ public class MyTreeMap<K,V>{
         return oldValue;
     }
 
-    public void putAll(MyTreeMap<? extends K, ? extends V> m) {
-        Set<? extends Entry<? extends K, ? extends V>> t2 = m.entrySet();
-        for (MyTreeMap.Entry<? extends K, ? extends V> i : t2) {
-           this.put(i.getKey(),i.getValue());
-        }
-        Mod++;
+    @Override
+    public void putAll(Map<? extends K, ? extends V> m) {
+        for (Map.Entry<? extends K, ? extends V> e : m.entrySet())
+            put(e.getKey(), e.getValue());
     }
 
     private void deleteEntry(Entry<K,V> p) {
@@ -164,6 +150,8 @@ public class MyTreeMap<K,V>{
             p.setValue(value);
             if (deletion.father.right == deletion) {
                 deletion.father.right = deletion.right;
+                if (deletion.right != null)
+                    deletion.right.father = deletion.father;
             }
             else {
                 deletion.father.left = deletion.right;
@@ -179,6 +167,8 @@ public class MyTreeMap<K,V>{
             p.setValue(value);
             if (deletion.father.left == deletion) {
                 deletion.father.left = deletion.left;
+                if(deletion.left != null)
+                    deletion.left.father = deletion.father;
             }
             else {
                 deletion.father.right = deletion.left;
@@ -188,56 +178,27 @@ public class MyTreeMap<K,V>{
         }
     }
 
-    public class TreeIterator implements Iterator<Entry<K,V>>{
-        private Entry<K,V> next;
-        int expected;
+    /* Множества вершин, ключей, значений, а также методы, возвращающие их */
 
-        public TreeIterator(Entry<K,V> root) {
-            expected = Mod;
-            next = root;
-            if(next == null)
-                return;
-
-            while (next.left != null)
-                next = next.left;
-        }
-
-        public boolean hasNext(){
-            return next != null;
-        }
-
-        public Entry<K,V> next(){
-            if(!hasNext()) throw new NoSuchElementException();
-            if (expected != Mod) {
-                throw new ConcurrentModificationException();
-            }
-            Entry<K,V> r = next;
-
-            if(next.right != null) {
-                next = next.right;
-                while (next.left != null)
-                    next = next.left;
-                return r;
-            }
-
-            while(true) {
-                if(next.father == null) {
-                    next = null;
-                    return r;
-                }
-                if(next.father.left == next) {
-                    next = next.father;
-                    return r;
-                }
-                next = next.father;
-            }
-        }
+    @Override
+    public Set<Map.Entry<K, V>> entrySet() {
+        return new EntrySet();
     }
 
-    class EntrySet extends AbstractSet<Entry<K,V>> {
+    @Override
+    public Set<K> keySet() {
+        return new KeySet();
+    }
 
-        public Iterator<Entry<K,V>> iterator() {
-            return new TreeIterator(root);
+    @Override
+    public Collection<V> values() {
+        return new Values();
+    }
+
+    class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+
+        public Iterator<Map.Entry<K,V>> iterator() {
+            return new EntryIterator(root);
         }
 
         public boolean contains(Object o) {
@@ -270,57 +231,12 @@ public class MyTreeMap<K,V>{
             MyTreeMap.this.clear();
         }
 
-    }
-
-    public class TreeIteratorKey implements Iterator<K>{
-        private Entry<K,V> next;
-        int expected;
-        public TreeIteratorKey(Entry<K,V> root) {
-            expected = Mod;
-            next = root;
-            if(next == null)
-                return;
-
-            while (next.left != null)
-                next = next.left;
-        }
-
-        public boolean hasNext(){
-            return next != null;
-        }
-
-        public K next(){
-            if(!hasNext()) throw new NoSuchElementException();
-            if (expected != Mod) {
-                throw new ConcurrentModificationException();
-            }
-            Entry<K,V> r = next;
-
-            if(next.right != null) {
-                next = next.right;
-                while (next.left != null)
-                    next = next.left;
-                return r.getKey();
-            }
-
-            while(true) {
-                if(next.father == null) {
-                    next = null;
-                    return r.getKey();
-                }
-                if(next.father.left == next) {
-                    next = next.father;
-                    return r.getKey();
-                }
-                next = next.father;
-            }
-        }
     }
 
     class KeySet extends AbstractSet<K> {
 
         public Iterator<K> iterator() {
-            return new TreeIteratorKey(root);
+            return new KeyIterator(root);
         }
 
         public boolean contains(Object o) {
@@ -355,54 +271,9 @@ public class MyTreeMap<K,V>{
 
     }
 
-    public class TreeIteratorValue implements Iterator<V>{
-        private Entry<K,V> next;
-        private int expected;
-        public TreeIteratorValue(Entry<K,V> root) {
-            expected = Mod;
-            next = root;
-            if(next == null)
-                return;
-
-            while (next.left != null)
-                next = next.left;
-        }
-
-        public boolean hasNext(){
-            return next != null;
-        }
-
-        public V next(){
-            if(!hasNext()) throw new NoSuchElementException();
-            if (expected != Mod) {
-                throw new ConcurrentModificationException();
-            }
-            Entry<K,V> r = next;
-
-            if(next.right != null) {
-                next = next.right;
-                while (next.left != null)
-                    next = next.left;
-                return r.getValue();
-            }
-
-            while(true) {
-                if(next.father == null) {
-                    next = null;
-                    return r.getValue();
-                }
-                if(next.father.left == next) {
-                    next = next.father;
-                    return r.getValue();
-                }
-                next = next.father;
-            }
-        }
-    }
-
     class Values extends AbstractCollection<V> {
         public Iterator<V> iterator() {
-            return new TreeIteratorValue(root);
+            return new ValueIterator(root);
         }
 
         public int size() {
@@ -414,10 +285,10 @@ public class MyTreeMap<K,V>{
         }
 
         public boolean remove(Object o) {
-            Set<Entry<K,V>> t2 = entrySet();
-            for (Entry<K, V> i : t2) {
+            Set<Map.Entry<K,V>> t2 = entrySet();
+            for (Map.Entry<K, V> i : t2) {
                 if (i.getValue().equals(o)) {
-                    deleteEntry(i);
+                    deleteEntry((Entry<K, V>) i);
                     return true;
                 }
             }
@@ -430,12 +301,102 @@ public class MyTreeMap<K,V>{
 
     }
 
-    static class Entry<K, V>{
-        K key;
-        V value;
-        Entry<K, V> left;
-        Entry<K, V> right;
-        Entry<K, V> father;
+    /* Итераторы */
+
+    abstract class PrivateEntryIterator<T> implements Iterator<T> {
+        MyTreeMap.Entry<K,V> next;
+        MyTreeMap.Entry<K,V> lastReturned;
+        int expectedModCount;
+
+        PrivateEntryIterator(MyTreeMap.Entry<K,V> first) {
+            expectedModCount = Mod;
+            lastReturned = null;
+            next = first;
+        }
+
+        public final boolean hasNext() {
+            return next != null;
+        }
+
+        final MyTreeMap.Entry<K,V> nextEntry() {
+            MyTreeMap.Entry<K,V> e = next;
+            if (e == null)
+                throw new NoSuchElementException();
+            if (Mod != expectedModCount)
+                throw new ConcurrentModificationException();
+
+            if(next.right != null) {
+                next = next.right;
+                while (next.left != null)
+                    next = next.left;
+                lastReturned = e;
+                return e;
+            }
+
+            while(true) {
+                if(next.father == null) {
+                    next = null;
+                    lastReturned = e;
+                    return e;
+                }
+                if(next.father.left == next) {
+                    next = next.father;
+                    lastReturned = e;
+                    return e;
+                }
+                next = next.father;
+            }
+        }
+
+        public void remove() {
+            if (lastReturned == null)
+                throw new IllegalStateException();
+            if (Mod != expectedModCount)
+                throw new ConcurrentModificationException();
+            // deleted entries are replaced by their successors
+            if (lastReturned.left != null && lastReturned.right != null)
+                next = lastReturned;
+            deleteEntry(lastReturned);
+            expectedModCount = Mod;
+            lastReturned = null;
+        }
+    }
+
+    final class EntryIterator extends PrivateEntryIterator<Map.Entry<K,V>> {
+        EntryIterator(MyTreeMap.Entry<K,V> first) {
+            super(first);
+        }
+        public Map.Entry<K,V> next() {
+            return nextEntry();
+        }
+    }
+
+    final class KeyIterator extends PrivateEntryIterator<K> {
+        KeyIterator(MyTreeMap.Entry<K,V> first) {
+            super(first);
+        }
+        public K next() {
+            return nextEntry().key;
+        }
+    }
+
+    final class ValueIterator extends PrivateEntryIterator<V> {
+        ValueIterator(MyTreeMap.Entry<K,V> first) {
+            super(first);
+        }
+        public V next() {
+            return nextEntry().value;
+        }
+    }
+
+    /* Класс вершина дерева */
+
+    static class Entry<K, V> implements Map.Entry<K, V>{
+        private K key;
+        private V value;
+        private Entry<K, V> left;
+        private Entry<K, V> right;
+        private Entry<K, V> father;
 
         Entry(K key,V value, Entry<K,V> left, Entry<K,V> right, Entry<K,V> father){
             this.key = key;
