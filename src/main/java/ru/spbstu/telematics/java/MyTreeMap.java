@@ -308,7 +308,11 @@ public class MyTreeMap<K,V> implements Map<K,V>{
         MyTreeMap.Entry<K,V> lastReturned;
         int expectedModCount;
 
-        PrivateEntryIterator(MyTreeMap.Entry<K,V> first) {
+        PrivateEntryIterator(MyTreeMap.Entry<K,V> root) {
+            Entry<K, V> first = root;
+            while (first.left != null) {
+                first = first.left;
+            }
             expectedModCount = Mod;
             lastReturned = null;
             next = first;
@@ -363,8 +367,8 @@ public class MyTreeMap<K,V> implements Map<K,V>{
     }
 
     final class EntryIterator extends PrivateEntryIterator<Map.Entry<K,V>> {
-        EntryIterator(MyTreeMap.Entry<K,V> first) {
-            super(first);
+        EntryIterator(MyTreeMap.Entry<K,V> root) {
+            super(root);
         }
         public Map.Entry<K,V> next() {
             return nextEntry();
@@ -372,8 +376,8 @@ public class MyTreeMap<K,V> implements Map<K,V>{
     }
 
     final class KeyIterator extends PrivateEntryIterator<K> {
-        KeyIterator(MyTreeMap.Entry<K,V> first) {
-            super(first);
+        KeyIterator(MyTreeMap.Entry<K,V> root) {
+            super(root);
         }
         public K next() {
             return nextEntry().key;
@@ -381,8 +385,8 @@ public class MyTreeMap<K,V> implements Map<K,V>{
     }
 
     final class ValueIterator extends PrivateEntryIterator<V> {
-        ValueIterator(MyTreeMap.Entry<K,V> first) {
-            super(first);
+        ValueIterator(MyTreeMap.Entry<K,V> root) {
+            super(root);
         }
         public V next() {
             return nextEntry().value;
@@ -445,6 +449,23 @@ public class MyTreeMap<K,V> implements Map<K,V>{
         public String toString() {
             return  key +
                     "=" + value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Entry<?, ?> entry = (Entry<?, ?>) o;
+            return Objects.equals(getKey(), entry.getKey()) &&
+                    Objects.equals(getValue(), entry.getValue()) &&
+                    Objects.equals(left, entry.left) &&
+                    Objects.equals(right, entry.right) &&
+                    Objects.equals(father, entry.father);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(getKey(), getValue(), left, right, father);
         }
     }
 
