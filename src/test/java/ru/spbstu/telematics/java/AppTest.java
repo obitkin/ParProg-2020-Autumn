@@ -1,22 +1,17 @@
 package ru.spbstu.telematics.java;
 
 import org.junit.*;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import static org.junit.Assert.*;
-
-import java.util.*;
 
 public class AppTest {
 
     static int numberOfBerriesInField = 10000;
+    static int boundOfBerriesInOneTime = 5;
 
-    public static void main(String[] args) {
-        System.out.println("main");
-
-        Field F = new Field(numberOfBerriesInField);
+    @Test
+    public void ConcurrencyTest() {
+        Field F = new Field(numberOfBerriesInField,boundOfBerriesInOneTime);
 
         Neighbor N1 = new Neighbor(0,F);
         Neighbor N2 = new Neighbor(0,F);
@@ -24,12 +19,18 @@ public class AppTest {
         N1.setNeighbor(N2);
         N2.setNeighbor(N1);
 
-        new Thread(N1).start();
-        new Thread(N2).start();
-    }
+        Thread neighbor1 = new Thread(N1);
+        Thread neighbor2 = new Thread(N2);
+        neighbor1.start();
+        neighbor2.start();
 
-    @Test
-    public void CuncorrencyTest() {
 
+        try {
+            neighbor1.join();
+            neighbor2.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assertEquals(N1.progress()+N2.progress(),numberOfBerriesInField -F.berries);
     }
 }
