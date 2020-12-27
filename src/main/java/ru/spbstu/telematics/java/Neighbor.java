@@ -1,14 +1,15 @@
+package ru.spbstu.telematics.java;
+import java.util.Random;
 
 public class Neighbor implements Runnable {
 
     Neighbor neighbor = null;
     int berries;
-    boolean flag;
+    final Random random = new Random();
     Field field;
 
-    public Neighbor(int berries, boolean flag, Field field) {
+    public Neighbor(int berries, Field field) {
         this.berries = berries;
-        this.flag = flag;
         this.field = field;
     }
 
@@ -25,13 +26,14 @@ public class Neighbor implements Runnable {
             throw new NullPointerException();
 
         while (!Thread.currentThread().isInterrupted()) {
+
             System.out.println(Thread.currentThread().getName() + " Before: " + berries);
 
             synchronized (field) {
                 while (berries > neighbor.progress() && !field.isEmpty()) {
                     try {
                         System.out.println(Thread.currentThread().getName() + " Is waiting: " + berries);
-                        field.wait(10);
+                        field.wait(random.nextInt(5000));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -39,10 +41,12 @@ public class Neighbor implements Runnable {
                 field.notify();
                 berries += field.getSomeBerries();
             }
+
             if (field.isEmpty()) {
                 System.out.println(Thread.currentThread().getName() + " is terminated: " + berries);
                 break;
             }
+
             System.out.println(Thread.currentThread().getName() + " After:  " + berries);
         }
     }

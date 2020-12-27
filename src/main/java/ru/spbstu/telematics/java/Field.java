@@ -1,3 +1,5 @@
+package ru.spbstu.telematics.java;
+
 import java.util.Random;
 
 public class Field {
