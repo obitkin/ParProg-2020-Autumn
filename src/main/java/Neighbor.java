@@ -1,11 +1,10 @@
 
-
 public class Neighbor implements Runnable {
 
-    int berries = 0;
     Neighbor neighbor = null;
-    boolean flag = false;
-    Field field = null;
+    int berries;
+    boolean flag;
+    Field field;
 
     public Neighbor(int berries, boolean flag, Field field) {
         this.berries = berries;
@@ -22,11 +21,17 @@ public class Neighbor implements Runnable {
     }
 
     public void run() {
+        if (neighbor == null)
+            throw new NullPointerException();
+
         while (!Thread.currentThread().isInterrupted()) {
+            System.out.println(Thread.currentThread().getName() + " Before: " + berries);
+
             synchronized (field) {
-                while (berries > neighbor.progress()) {
+                while (berries > neighbor.progress() && !field.isEmpty()) {
                     try {
-                        field.wait();
+                        System.out.println(Thread.currentThread().getName() + " Is waiting: " + berries);
+                        field.wait(10);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -34,8 +39,11 @@ public class Neighbor implements Runnable {
                 field.notify();
                 berries += field.getSomeBerries();
             }
-            System.out.println(Thread.currentThread().getName() + " " + berries);
-
+            if (field.isEmpty()) {
+                System.out.println(Thread.currentThread().getName() + " is terminated: " + berries);
+                break;
+            }
+            System.out.println(Thread.currentThread().getName() + " After:  " + berries);
         }
     }
 }
