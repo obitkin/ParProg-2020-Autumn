@@ -4,10 +4,12 @@ import java.util.Random;
 
 public class Field {
     int berries;
+    int bound;
     final Random random = new Random();
 
-    public Field(int berries) {
+    public Field(int berries, int bound) {
         this.berries = berries;
+        this.bound = (bound <= 0)? 5: bound;
     }
 
     int getSomeBerries() {
