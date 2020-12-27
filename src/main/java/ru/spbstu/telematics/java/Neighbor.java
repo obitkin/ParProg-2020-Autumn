@@ -3,10 +3,10 @@ import java.util.Random;
 
 public class Neighbor implements Runnable {
 
-    Neighbor neighbor = null;
-    int berries;
-    final Random random = new Random();
-    Field field;
+    private Neighbor neighbor = null;
+    private int berries;
+    private final Random random = new Random();
+    private Field field;
 
     public Neighbor(int berries, Field field) {
         this.berries = berries;
@@ -33,7 +33,7 @@ public class Neighbor implements Runnable {
                 while (berries > neighbor.progress() && !field.isEmpty()) {
                     try {
                         System.out.println(Thread.currentThread().getName() + " Is waiting: " + berries);
-                        field.wait(random.nextInt(5000));
+                        field.wait(random.nextInt(1000));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
