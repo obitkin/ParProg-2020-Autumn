@@ -10,7 +10,7 @@ public class Bush implements Runnable  {
     private final Random random = new Random();
 
     Bush(Field field, int bound, int timeOut) {
-        if (bound <= 0 || timeOut <= 0)
+        if (bound <= 1 || timeOut <= 0)
             throw new IllegalArgumentException();
 
         this.field = field;
@@ -29,7 +29,7 @@ public class Bush implements Runnable  {
             field.addSomeBerries(r);
 
             try {
-                Thread.sleep(timeOut);
+                Thread.sleep(random.nextInt(timeOut));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
