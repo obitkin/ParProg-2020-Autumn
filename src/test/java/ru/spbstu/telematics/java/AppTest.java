@@ -9,11 +9,11 @@ public class AppTest {
     //Parameters for Field
     static int numberOfBerries = 10000; //Изначальное число ягод на поле
     static int numberOfMaxBerries= 20000; //Максимальное число ягод на поле
-    static int boundTakenBerriesInOneTime = 10; //Число ягод >1, которое можно забрать за раз (rand(boundTakenBerriesInOneTime))
+    static int boundTakenBerriesInOneTime = 50; //Число ягод >1, которое можно забрать за раз (rand(boundTakenBerriesInOneTime))
 
     //Parameters for Bushes
-    static int timeOutBush = 0; //Период добавления новых ягод
-    static int boundProducedBerriesInOneTime = 100; //Число ягод >1, которое которые выросли за раз (rand(boundProducedBerriesInOneTime))
+    static int timeOutBush = 10; //Период добавления новых ягод
+    static int boundProducedBerriesInOneTime = 50; //Число ягод >1, которое которые выросли за раз (rand(boundProducedBerriesInOneTime))
 
     //Parameters for Neighbors
     static int timeOutNeighbor = 10; //Период сбора ягод
