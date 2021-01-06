@@ -3,7 +3,7 @@ import java.util.Random;
 
 public class Neighbor implements Runnable {
 
-    private Boolean flag;
+    private Flag flag;
     private Neighbor neighbor = null;
     private int berries = 0;
     private int maxBerries;
@@ -11,7 +11,7 @@ public class Neighbor implements Runnable {
     private int timeOut;
     private final Random random = new Random();
 
-    public Neighbor(Field field, int timeOut, Boolean flag, int maxBerries) {
+    public Neighbor(Field field, Flag flag, int timeOut, int maxBerries) {
         if (timeOut <= 0 || maxBerries <= 0)
             throw new IllegalArgumentException();
 
@@ -37,26 +37,22 @@ public class Neighbor implements Runnable {
 
             System.out.println(Thread.currentThread().getName() + " Before: " + berries);
 
-            synchronized (flag) {
-                while (berries > neighbor.progress()) {
-                    try {
-                        System.out.println(Thread.currentThread().getName() + " Is waiting: " + berries);
-                        flag.wait();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+            if(flag.tryRaiseFlag()) {
+                if (this.progress() > neighbor.progress()) {
+                    System.out.println(Thread.currentThread().getName() + " Is waiting for progress: " + berries);
                 }
-                synchronized (field) {
-                    berries += field.getSomeBerries();
-                    if (berries >= maxBerries) {
-                        int extraBerries = berries - maxBerries;
-                        if (extraBerries > 0) {
-                            field.returnSomeBerries(extraBerries);
-                            berries -= extraBerries;
-                        }
-                    }
+                else {
+                    berries += field.getSomeBerries(this.maxBerries - this.berries);
                 }
-                flag.notify();
+                flag.lowerFlag();
+            }
+            else {
+                try {
+                    Thread.sleep(random.nextInt(timeOut)); //do another job 1
+                    System.out.println(Thread.currentThread().getName() + " Is waiting for flag: " + berries);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             System.out.println(Thread.currentThread().getName() + " After:  " + berries);
@@ -67,7 +63,7 @@ public class Neighbor implements Runnable {
             }
 
             try {
-                Thread.sleep(timeOut);
+                Thread.sleep(random.nextInt(timeOut)); //do another job 2
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
