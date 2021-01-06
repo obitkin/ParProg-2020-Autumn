@@ -47,12 +47,7 @@ public class Neighbor implements Runnable {
                 flag.lowerFlag();
             }
             else {
-                try {
-                    Thread.sleep(random.nextInt(timeOut)); //do another job 1
-                    System.out.println(Thread.currentThread().getName() + " Is waiting for flag: " + berries);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                System.out.println(Thread.currentThread().getName() + " Is waiting for flag: " + berries);
             }
 
             System.out.println(Thread.currentThread().getName() + " After:  " + berries);
@@ -63,7 +58,7 @@ public class Neighbor implements Runnable {
             }
 
             try {
-                Thread.sleep(random.nextInt(timeOut)); //do another job 2
+                Thread.sleep(random.nextInt(timeOut)); //do another job 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
