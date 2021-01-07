@@ -6,7 +6,7 @@ public class Multiplier {
 
     static private CopyOnWriteArrayList<Future<?>> result = new CopyOnWriteArrayList<>();
 
-    static private ExecutorService service = Executors.newFixedThreadPool(2);
+    static private ExecutorService service;
 
     static public double[][] multiplySerial(double[][] A, double[][] B) {
         if (A[0].length != B.length)
@@ -32,9 +32,18 @@ public class Multiplier {
         int column = B[0].length;
         double[][] res = new double[row][column];
 
-        for (int i = 0; i < row; i++)
-            for (int j = 0; j < column; j++)
-                result.add(service.submit(new MultiplyWorker(A,B,i,j,res)));
+        int available = Runtime.getRuntime().availableProcessors()-7;
+        System.out.println();
+        service = Executors.newFixedThreadPool(available);
+
+        int numberOfRowPerThread = row / available;
+
+        for (int i = 0; i < available; i++) {
+            if (i == available - 1)
+                result.add(service.submit(new MultiplyWorker(A,B,numberOfRowPerThread*i,row,res)));
+            else
+                result.add(service.submit(new MultiplyWorker(A,B,numberOfRowPerThread*i,numberOfRowPerThread*(i+1),res)));
+        }
 
         int done = 0;
         while (!result.isEmpty()) {
@@ -44,7 +53,11 @@ public class Multiplier {
                     result.remove(f);
                 }
             }
-            Thread.yield();
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         return res;
@@ -55,24 +68,33 @@ public class Multiplier {
         double[][] a;
         double[][] b;
         int i;
-        int j;
+        int I;
         double[][] res;
 
-        public MultiplyWorker(double[][] a, double[][] b, int i, int j, double[][] res) {
+        public MultiplyWorker(double[][] a, double[][] b, int i, int I, double[][] res) {
             this.a = a;
             this.b = b;
             this.i = i;
-            this.j = j;
+            this.I = I;
             this.res = res;
         }
 
         @Override
         public void run() {
+
             double cell = 0;
-            for (int length = 0; length < a[i].length; length++) {
-                cell += a[i][length] * b[length][j];
+            int rowLengthA = a[i].length;
+            int rowLengthB = b[0].length;
+
+            for (int row = i; row < I; row++) {
+                for (int column = 0; column < rowLengthB; column++) {
+                    cell = 0;
+                    for (int length = 0; length < rowLengthA; length++) {
+                        cell += a[row][length] * b[length][column];
+                    }
+                    res[row][column] = cell;
+                }
             }
-            res[i][j] = cell;
         }
     }
 }

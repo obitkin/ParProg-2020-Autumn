@@ -14,16 +14,16 @@ public class AppTest {
     double[][] A;
     double[][] B;
 
-    int row = 200;
-    int column = 200;
+    int row = 100;
+    int column = 100;
 
     @Test
     public void ConcurrencyTest() {
         A = new double[row][column];
         B = new double[row][column];
 
-        int g = Runtime.getRuntime().availableProcessors();
-        System.out.println(g);
+        //int g = Runtime.getRuntime().availableProcessors();
+        //System.out.println(g);
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < column; j++) {
                 A[i][j] = random.nextDouble();
@@ -32,15 +32,13 @@ public class AppTest {
         }
         long t = System.currentTimeMillis();
         double[][] res1 = Multiplier.multiplyParallel(A,B);
-        System.out.println("execution time " + (System.currentTimeMillis() - t));
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.out.println("Parallel execution time " + (System.currentTimeMillis() - t));
+
+
+
         t = System.currentTimeMillis();
         double[][] res2 = Multiplier.multiplySerial(A,B);
-        System.out.println("execution time " + (System.currentTimeMillis() - t));
+        System.out.println("Serial execution time   " + (System.currentTimeMillis() - t));
 
         //System.out.println(Arrays.deepToString(res1));
         //System.out.println(Arrays.deepToString(res2));
