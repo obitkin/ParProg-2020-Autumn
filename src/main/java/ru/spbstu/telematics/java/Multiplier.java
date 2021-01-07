@@ -1,40 +1,78 @@
 package ru.spbstu.telematics.java;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Multiplier {
-    ExecutorService service = Executors.newCachedThreadPool();
-    double[][] A;
-    double[][] B;
-    double[][] res;
 
-    double[][] multiply(double[][] A, double[][] B) {
+    static private CopyOnWriteArrayList<Future<?>> result = new CopyOnWriteArrayList<>();
+
+    static private ExecutorService service = Executors.newFixedThreadPool(2);
+
+    static public double[][] multiplySerial(double[][] A, double[][] B) {
         if (A[0].length != B.length)
             return null;
 
-        this.A = A;
-        this.B = B;
-
         int row = A.length;
         int column = B[0].length;
-        this.res = new double[row][column];
+        double[][] res = new double[row][column];
+
         for (int i = 0; i < row; i++)
             for (int j = 0; j < column; j++)
-                service.submit(new multiplyWorker(A,B,i,j,res));
+                for (int k = 0; k < A[i].length; k++)
+                    res[i][j] += A[i][k] * B[k][j];
 
         return res;
     }
 
-    class multiplyWorker implements Runnable{
+    static public double[][] multiplyParallel(double[][] A, double[][] B) {
+        if (A[0].length != B.length)
+            return null;
 
-        multiplyWorker(double[][] A, double[][] B, int i, int j, double[][] res) {
+        int row = A.length;
+        int column = B[0].length;
+        double[][] res = new double[row][column];
 
+        for (int i = 0; i < row; i++)
+            for (int j = 0; j < column; j++)
+                result.add(service.submit(new MultiplyWorker(A,B,i,j,res)));
+
+        int done = 0;
+        while (!result.isEmpty()) {
+            for (Future<?> f : result) {
+                if (f.isDone()) {
+                    done++;
+                    result.remove(f);
+                }
+            }
+            Thread.yield();
+        }
+
+        return res;
+    }
+
+    static private class MultiplyWorker implements Runnable {
+
+        double[][] a;
+        double[][] b;
+        int i;
+        int j;
+        double[][] res;
+
+        public MultiplyWorker(double[][] a, double[][] b, int i, int j, double[][] res) {
+            this.a = a;
+            this.b = b;
+            this.i = i;
+            this.j = j;
+            this.res = res;
         }
 
         @Override
         public void run() {
-
+            double cell = 0;
+            for (int length = 0; length < a[i].length; length++) {
+                cell += a[i][length] * b[length][j];
+            }
+            res[i][j] = cell;
         }
     }
 }
