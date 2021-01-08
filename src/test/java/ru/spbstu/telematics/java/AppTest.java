@@ -1,8 +1,6 @@
 package ru.spbstu.telematics.java;
 
 import org.junit.*;
-
-import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -14,37 +12,48 @@ public class AppTest {
     double[][] A;
     double[][] B;
 
-    int row = 1023;
-    int column = 1023;
+    //Result matrix == m * l
+    void init(int m, int n, int l) {
 
-    @Test
-    public void ConcurrencyTest() {
-        System.out.println("Row = column = " + row);
-        A = new double[row][column];
-        B = new double[row][column];
+        A = new double[m][n];
+        B = new double[n][l];
 
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < column; j++) {
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
                 A[i][j] = random.nextDouble();
-                B[i][j] = random.nextDouble();
             }
         }
 
-        long t = System.currentTimeMillis();
-        double[][] res2 = Multiplier.multiplySerial(A,B);
-        System.out.println("Serial execution time   " + (System.currentTimeMillis() - t));
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < l; j++) {
+                B[i][j] = random.nextDouble();
+            }
+        }
+    }
 
-        t = System.currentTimeMillis();
-        double[][] res1 = Multiplier.multiplyParallel(A,B);
-        System.out.println("Parallel execution time " + (System.currentTimeMillis() - t));
+    @Test
+    public void ConcurrencyTest() {
+        System.out.println("Square matrix:");
+        int m = 1, n = 1, l = 1;
 
-        //System.out.println(Arrays.deepToString(res1));
-        //System.out.println(Arrays.deepToString(res2));
-        t = System.currentTimeMillis();
-        for (int i = 0; i < row; i++)
-            assertArrayEquals(res1[i],res2[i],0.001);
-        System.out.println("Equals time " + (System.currentTimeMillis() - t));
-        System.out.println("------------------------");
+        for (int i = 1; i <= 12; i++) {
+            m = n = l = l * 2;
+            System.out.println("i = " + i + "  " + m + "*" + n + " x " + n + "*" + l);
+            init(m, n, l);
+
+            long t = System.currentTimeMillis();
+            double[][] res2 = Multiplier.multiplySerial(A,B);
+            System.out.println("Serial execution time   " + (System.currentTimeMillis() - t));
+
+            t = System.currentTimeMillis();
+            double[][] res1 = Multiplier.multiplyParallel(A,B);
+            System.out.println("Parallel execution time " + (System.currentTimeMillis() - t));
+
+            for (int j = 0; j < m; j++)
+                assertArrayEquals(res1[j],res2[j],0.00001);
+
+            System.out.println("------------------------");
+        }
     }
 
 }
