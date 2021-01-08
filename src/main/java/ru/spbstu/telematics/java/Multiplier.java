@@ -1,12 +1,13 @@
 package ru.spbstu.telematics.java;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 public class Multiplier {
 
-    static private CopyOnWriteArrayList<Future<?>> result = new CopyOnWriteArrayList<>();
-
-    static private ExecutorService service;
+    private static final int  MINIMUM_THRESHOLD = 64;
+    private static final ExecutorService exec = Executors.newWorkStealingPool();
 
     static public double[][] multiplySerial(double[][] A, double[][] B) {
         if (A[0].length != B.length)
@@ -32,69 +33,94 @@ public class Multiplier {
         int column = B[0].length;
         double[][] res = new double[row][column];
 
-        int available = Runtime.getRuntime().availableProcessors()-7;
-        System.out.println();
-        service = Executors.newFixedThreadPool(available);
+        Future f = exec.submit(new MultiplyTask(A, B, res, 0, 0, 0, 0, 0, 0, A.length));
+        try {
+            f.get();
+            exec.shutdown();
+        } catch (Exception e) {
 
-        int numberOfRowPerThread = row / available;
-
-        for (int i = 0; i < available; i++) {
-            if (i == available - 1)
-                result.add(service.submit(new MultiplyWorker(A,B,numberOfRowPerThread*i,row,res)));
-            else
-                result.add(service.submit(new MultiplyWorker(A,B,numberOfRowPerThread*i,numberOfRowPerThread*(i+1),res)));
         }
-
-        int done = 0;
-        while (!result.isEmpty()) {
-            for (Future<?> f : result) {
-                if (f.isDone()) {
-                    done++;
-                    result.remove(f);
-                }
-            }
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
         return res;
     }
 
-    static private class MultiplyWorker implements Runnable {
+    static class MultiplyTask implements Runnable{
+        private double[][] a;
+        private double[][] b;
+        private double[][] c;
+        private int a_i, a_j, b_i, b_j, c_i, c_j, size;
 
-        double[][] a;
-        double[][] b;
-        int i;
-        int I;
-        double[][] res;
-
-        public MultiplyWorker(double[][] a, double[][] b, int i, int I, double[][] res) {
+        MultiplyTask(double[][] a, double[][] b, double[][] c, int a_i, int a_j, int b_i, int b_j, int c_i, int c_j, int size) {
             this.a = a;
             this.b = b;
-            this.i = i;
-            this.I = I;
-            this.res = res;
+            this.c = c;
+            this.a_i = a_i;
+            this.a_j = a_j;
+            this.b_i = b_i;
+            this.b_j = b_j;
+            this.c_i = c_i;
+            this.c_j = c_j;
+            this.size = size;
+        }
+
+        public void run() {
+            //System.out.format("[%d,%d]x[%d,%d](%d)\n",a_i,a_j,b_i,b_j,size);
+            if (size <= MINIMUM_THRESHOLD) {
+                for (int i = 0; i < size; ++i) {
+                    for (int j = 0; j < size; ++j) {
+                        for (int k = 0; k < size; ++k) {
+                            c[c_i+i][c_j+j] += a[a_i+i][a_j+k] * b[b_i+k][b_j+j];
+                        }
+                    }
+                }
+            } else {
+                int h = size/2;
+                MultiplyTask[] tasks = {
+                        new MultiplyTask(a, b, c, a_i, a_j, b_i, b_j, c_i, c_j, h),
+                        new MultiplyTask(a, b, c, a_i, a_j+h, b_i+h, b_j, c_i, c_j, h),
+
+                        new MultiplyTask(a, b, c, a_i, a_j, b_i, b_j+h, c_i, c_j+h, h),
+                        new MultiplyTask(a, b, c, a_i, a_j+h, b_i+h, b_j+h, c_i, c_j+h, h),
+
+                        new MultiplyTask(a, b, c, a_i+h, a_j, b_i, b_j, c_i+h, c_j, h),
+                        new MultiplyTask(a, b, c, a_i+h, a_j+h, b_i+h, b_j, c_i+h, c_j, h),
+
+                        new MultiplyTask(a, b, c, a_i+h, a_j, b_i, b_j+h, c_i+h, c_j+h, h),
+                        new MultiplyTask(a, b, c, a_i+h, a_j+h, b_i+h, b_j+h, c_i+h, c_j+h, h)
+                };
+
+                List<Future<?>> t = new ArrayList<>();
+                Sequentializer[] fs = new Sequentializer[tasks.length/2];
+
+                for (int i = 0; i < tasks.length; i+=2) {
+                    fs[i/2] = new Sequentializer(tasks[i], tasks[i+1]);
+                    t.add(exec.submit(fs[i/2]));
+
+                }
+                try {
+                    for (int i = 0; i < fs.length; ++i) {
+                        t.get(i).get();
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+        }
+    }
+
+    static class Sequentializer implements Runnable{
+        private MultiplyTask first, second;
+        Sequentializer(MultiplyTask first, MultiplyTask second) {
+            this.first = first;
+            this.second = second;
         }
 
         @Override
         public void run() {
-
-            double cell = 0;
-            int rowLengthA = a[i].length;
-            int rowLengthB = b[0].length;
-
-            for (int row = i; row < I; row++) {
-                for (int column = 0; column < rowLengthB; column++) {
-                    cell = 0;
-                    for (int length = 0; length < rowLengthA; length++) {
-                        cell += a[row][length] * b[length][column];
-                    }
-                    res[row][column] = cell;
-                }
-            }
+            first.run();
+            second.run();
         }
+
     }
+
+
 }
