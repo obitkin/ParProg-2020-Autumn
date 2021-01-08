@@ -14,8 +14,8 @@ public class AppTest {
     double[][] A;
     double[][] B;
 
-    int row = 1024;
-    int column = 1024;
+    int row = 1023;
+    int column = 1023;
 
     @Test
     public void ConcurrencyTest() {
