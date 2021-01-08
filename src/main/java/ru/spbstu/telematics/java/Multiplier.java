@@ -6,35 +6,43 @@ import java.util.concurrent.*;
 
 public class Multiplier {
 
-    private static final int  MINIMUM_THRESHOLD = 64;
-    private static final ExecutorService exec = Executors.newWorkStealingPool();
+    private static final int MINIMUM_THRESHOLD = 64;
+    private static ExecutorService exec;
 
     static public double[][] multiplySerial(double[][] A, double[][] B) {
         if (A[0].length != B.length)
-            return null;
+            throw new RuntimeException();
 
-        int row = A.length;
-        int column = B[0].length;
-        double[][] res = new double[row][column];
-
-        for (int i = 0; i < row; i++)
-            for (int j = 0; j < column; j++)
-                for (int k = 0; k < A[i].length; k++)
-                    res[i][j] += A[i][k] * B[k][j];
-
-        return res;
-    }
-
-    static public double[][] multiplyParallel(double[][] A, double[][] B) {
-        if (A[0].length != B.length)
-            return null;
         int a_h_b_v = A[0].length;
         int a_v = A.length;
         int b_h = B[0].length;
 
-        double[][] res = new double[a_v][b_h];
+        double[][] c = new double[a_v][b_h];
 
-        Future f = exec.submit(new MultiplyTask(A, B, res,
+        for (int i = 0; i < a_v; i++)
+            for (int j = 0; j < b_h; j++)
+                for (int k = 0; k < a_h_b_v; k++)
+                    c[i][j] += A[i][k] * B[k][j];
+
+        return c;
+    }
+
+    static public double[][] multiplyParallel(double[][] A, double[][] B) {
+        return multiplyParallel(A, B, Runtime.getRuntime().availableProcessors());
+    }
+
+    static public double[][] multiplyParallel(double[][] A, double[][] B, int parallelism) {
+        if (A[0].length != B.length || parallelism < 1)
+            throw new RuntimeException();
+
+        exec = Executors.newWorkStealingPool(parallelism);
+        int a_h_b_v = A[0].length;
+        int a_v = A.length;
+        int b_h = B[0].length;
+
+        double[][] c = new double[a_v][b_h];
+
+        Future f = exec.submit(new MultiplyTask(A, B, c,
                                     0, 0,  a_h_b_v, a_v,
                                     0, 0,  b_h, a_h_b_v,
                                     0, 0,  b_h, a_v));
@@ -42,9 +50,9 @@ public class Multiplier {
             f.get();
             exec.shutdown();
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
-        return res;
+        return c;
     }
 
     static class MultiplyTask implements Runnable{
@@ -75,7 +83,6 @@ public class Multiplier {
         }
 
         public void run() {
-            //System.out.format("[%d,%d]x[%d,%d](%d)\n",a_i,a_j,b_i,b_j,size);
             if (a_h <= MINIMUM_THRESHOLD && a_v <= MINIMUM_THRESHOLD && b_h <= MINIMUM_THRESHOLD) {
                 for (int i = 0; i < a_v; ++i) { //rows
                     for (int j = 0; j < b_h; ++j) { //columns
@@ -100,60 +107,59 @@ public class Multiplier {
                         // |  3  |  4  |        |  3  |  4  |       |  3  |  4  |
                         // -------------        -------------       -------------
                         new MultiplyTask(a, b, c,
-                                a_i, a_j, A_left, A_top, //A1
-                                b_i, b_j, B_left, B_top, //B1
-                                c_i, c_j, B_left, A_top),//C1
+                                a_i, a_j, A_left, A_top,               //A1
+                                b_i, b_j, B_left, B_top,               //B1
+                                c_i, c_j, B_left, A_top),              //C1
 
                         new MultiplyTask(a, b, c,
                                 a_i, a_j + A_left, A_right, A_top, //A2
-                                b_i + B_top, b_j, B_left, B_bot, //B3
-                                c_i, c_j, B_left, A_top),//C1
+                                b_i + B_top, b_j, B_left, B_bot,   //B3
+                                c_i, c_j, B_left, A_top),              //C1
 
                         new MultiplyTask(a, b, c,
-                                a_i, a_j, A_left, A_top, //A1
+                                a_i, a_j, A_left, A_top,               //A1
                                 b_i, b_j + B_left, B_right, B_top, //B2
                                 c_i, c_j + B_left, B_right, A_top),//C2
 
                         new MultiplyTask(a, b, c,
-                                a_i, a_j + A_left, A_right, A_top, //A2
-                                b_i + B_top, b_j + B_left, B_right, B_bot, //B4
-                                c_i, c_j + B_left, B_right, A_top),//C2
+                                a_i, a_j + A_left, A_right, A_top,              //A2
+                                b_i + B_top, b_j + B_left, B_right, B_bot,  //B4
+                                c_i, c_j + B_left, B_right, A_top),             //C2
 
                         new MultiplyTask(a, b, c,
-                                a_i + A_top, a_j, A_left, A_bot, //A3
-                                b_i, b_j, B_left, B_top, //B1
-                                c_i + A_top, c_j, B_left, A_bot),//C3
+                                a_i + A_top, a_j, A_left, A_bot,   //A3
+                                b_i, b_j, B_left, B_top,               //B1
+                                c_i + A_top, c_j, B_left, A_bot),  //C3
 
                         new MultiplyTask(a, b, c,
-                                a_i + A_top, a_j + A_left, A_right, A_bot, //A4
-                                b_i + B_top, b_j, B_left, B_bot, //B3
-                                c_i + A_top, c_j, B_left, A_bot),//C3
+                                a_i + A_top, a_j + A_left, A_right, A_bot,  //A4
+                                b_i + B_top, b_j, B_left, B_bot,                //B3
+                                c_i + A_top, c_j, B_left, A_bot),               //C3
 
                         new MultiplyTask(a, b, c,
-                                a_i + A_top, a_j, A_left, A_bot, //A3
-                                b_i, b_j + B_left, B_right, B_top, //B2
-                                c_i + A_top, c_j + B_left, B_right, A_bot),//C4
+                                a_i + A_top, a_j, A_left, A_bot,                //A3
+                                b_i, b_j + B_left, B_right, B_top,              //B2
+                                c_i + A_top, c_j + B_left, B_right, A_bot), //C4
 
                         new MultiplyTask(a, b, c,
-                                a_i + A_top, a_j + A_left, A_right, A_bot, //A4
-                                b_i + B_top, b_j + B_left, B_right, B_bot, //B4
-                                c_i + A_top, c_j + B_left, B_right, A_bot),//C4
+                                a_i + A_top, a_j + A_left, A_right, A_bot,  //A4
+                                b_i + B_top, b_j + B_left, B_right, B_bot,  //B4
+                                c_i + A_top, c_j + B_left, B_right, A_bot), //C4
                 };
 
                 List<Future<?>> t = new ArrayList<>();
-                Sequentializer[] fs = new Sequentializer[tasks.length/2];
+                Sequentializer[] taskPairs = new Sequentializer[tasks.length/2];
 
-                for (int i = 0; i < tasks.length; i+=2) {
-                    fs[i/2] = new Sequentializer(tasks[i], tasks[i+1]);
-                    t.add(exec.submit(fs[i/2]));
-
+                for (int i = 0; i < tasks.length; i += 2) {
+                    taskPairs[i/2] = new Sequentializer(tasks[i], tasks[i+1]);
+                    t.add(exec.submit(taskPairs[i/2]));
                 }
                 try {
-                    for (int i = 0; i < fs.length; ++i) {
+                    for (int i = 0; i < taskPairs.length; ++i) {
                         t.get(i).get();
                     }
                 } catch (Exception e) {
-
+                    e.printStackTrace();
                 }
             }
         }
@@ -161,6 +167,7 @@ public class Multiplier {
 
     static class Sequentializer implements Runnable{
         private MultiplyTask first, second;
+
         Sequentializer(MultiplyTask first, MultiplyTask second) {
             this.first = first;
             this.second = second;
