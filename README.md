@@ -9,4 +9,5 @@ Parallel programming(3-4) and simple(1-2) java labs
 
 :white_check_mark: **Lab4**: Parallel matrix multiplication for 2 matrix
 
-![Time of computation parallel and linear matrix multiplication](https://github.com/obitkin/ParProg2020/blob/master/TimeOfComputation.png)
+Time of computation parallel and linear matrix multiplication:
+![image alt](https://github.com/obitkin/ParProg2020/blob/master/TimeOfComputation.png)
